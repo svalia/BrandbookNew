@@ -10,8 +10,32 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center">Brandbook Manager</h1>
-        <div id="app">
-            <!-- Контент приложения будет добавляться динамически -->
+        <div class="text-end mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBrandModal">Добавить бренд</button>
+        </div>
+        <div id="brandsList" class="list-group">
+            <!-- Список брендов будет динамически добавляться -->
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления бренда -->
+    <div class="modal fade" id="addBrandModal" tabindex="-1" aria-labelledby="addBrandModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBrandModalLabel">Добавить бренд</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addBrandForm">
+                        <div class="mb-3">
+                            <label for="brandName" class="form-label">Название бренда</label>
+                            <input type="text" class="form-control" id="brandName" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>

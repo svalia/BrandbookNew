@@ -12,3 +12,18 @@ h1 {
 .container {
     max-width: 800px;
 }
+
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #fff;
+}
+
+.list-group-item button {
+    font-size: 0.875rem;
+}
