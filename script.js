@@ -73,6 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
             </ul>
         `;
 
+        console.log("Секции бренда добавлены в DOM"); // Отладочное сообщение
+
         // Добавляем обработчики для сворачивания/разворачивания секций
         document.querySelectorAll(".toggle-section").forEach((section) => {
             console.log(`Добавлен обработчик для секции: ${section.getAttribute("data-section")}`); // Отладочное сообщение
@@ -84,8 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Переключаем класс для отображения/скрытия
                 sectionElement.classList.toggle("active");
                 if (sectionElement.classList.contains("active")) {
+                    console.log(`Секция ${sectionName} развернута`); // Отладочное сообщение
                     sectionElement.innerHTML = `${sectionElement.textContent} (развернуто)`;
                 } else {
+                    console.log(`Секция ${sectionName} свернута`); // Отладочное сообщение
                     sectionElement.innerHTML = sectionElement.textContent.replace(" (развернуто)", "");
                 }
             });
