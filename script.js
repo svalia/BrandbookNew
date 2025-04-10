@@ -58,20 +58,37 @@ document.addEventListener("DOMContentLoaded", () => {
         brandSections.innerHTML = `
             <h3>Секции бренда: ${brand.name}</h3>
             <ul class="list-group">
-                <li class="list-group-item">Описание бренда</li>
-                <li class="list-group-item">Логотипы</li>
-                <li class="list-group-item">Цвета и цветовые стили</li>
-                <li class="list-group-item">Текстуры</li>
-                <li class="list-group-item">Градиенты</li>
-                <li class="list-group-item">Типографика</li>
-                <li class="list-group-item">Ключевые персонажи/элементы</li>
-                <li class="list-group-item">Тональность коммуникации</li>
-                <li class="list-group-item">Стандарты сервиса</li>
-                <li class="list-group-item">Графические элементы</li>
-                <li class="list-group-item">Рекламные материалы</li>
-                <li class="list-group-item">Стили бренда</li>
+                <li class="list-group-item toggle-section" data-section="brandDescription">Описание бренда</li>
+                <li class="list-group-item toggle-section" data-section="logos">Логотипы</li>
+                <li class="list-group-item toggle-section" data-section="colors">Цвета и цветовые стили</li>
+                <li class="list-group-item toggle-section" data-section="textures">Текстуры</li>
+                <li class="list-group-item toggle-section" data-section="gradients">Градиенты</li>
+                <li class="list-group-item toggle-section" data-section="typography">Типографика</li>
+                <li class="list-group-item toggle-section" data-section="keyElements">Ключевые персонажи/элементы</li>
+                <li class="list-group-item toggle-section" data-section="toneOfVoice">Тональность коммуникации</li>
+                <li class="list-group-item toggle-section" data-section="serviceStandards">Стандарты сервиса</li>
+                <li class="list-group-item toggle-section" data-section="graphicElements">Графические элементы</li>
+                <li class="list-group-item toggle-section" data-section="advertisingMaterials">Рекламные материалы</li>
+                <li class="list-group-item toggle-section" data-section="styleGuide">Стили бренда</li>
             </ul>
         `;
+
+        // Добавляем обработчики для сворачивания/разворачивания секций
+        document.querySelectorAll(".toggle-section").forEach((section) => {
+            section.addEventListener("click", (e) => {
+                const sectionElement = e.target;
+                const sectionName = sectionElement.getAttribute("data-section");
+                console.log(`Клик по секции: ${sectionName}`); // Отладочное сообщение
+
+                // Переключаем класс для отображения/скрытия
+                sectionElement.classList.toggle("active");
+                if (sectionElement.classList.contains("active")) {
+                    sectionElement.innerHTML = `${sectionElement.textContent} (развернуто)`;
+                } else {
+                    sectionElement.innerHTML = sectionElement.textContent.replace(" (развернуто)", "");
+                }
+            });
+        });
     }
 
     // Функция для отображения списка брендов
