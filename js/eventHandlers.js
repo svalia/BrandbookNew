@@ -5,8 +5,10 @@ import { renderBrands } from './uiManager.js';
 import { addItem } from './itemManager.js';  // Добавляем этот импорт
 import { initializeBrandManager } from './brandManager.js';
 
-// Инициализация приложения
+// Убедимся, что экспортируем функцию initializeApp
 export function initializeApp() {
+    // Логика инициализации приложения
+    console.log('Приложение инициализировано');
     setupEventListeners();
     loadInitialData();
 }
