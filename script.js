@@ -5,12 +5,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const brandsList = document.getElementById("brandsList");
     const addBrandForm = document.getElementById("addBrandForm");
-    const brandSections = document.getElementById("brandSections");
     const addBrandButton = document.querySelector('[data-bs-target="#addBrandModal"]'); // Кнопка "Добавить бренд"
 
+    // Обновляем кнопку "Добавить бренд"
+    addBrandButton.classList.add("btn-add-brand");
+    addBrandButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Добавить бренд
+    `;
+
     // Проверяем, что элементы найдены
-    if (!brandsList || !addBrandForm || !brandSections) {
-        console.error("Не удалось найти элементы brandsList, addBrandForm или brandSections");
+    if (!brandsList || !addBrandForm) {
+        console.error("Не удалось найти элементы brandsList или addBrandForm");
         return;
     }
 
@@ -60,26 +69,57 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log(`Добавляем бренд в список: ${brand.name}`); // Отладочное сообщение
 
             const brandItem = document.createElement("div");
-            brandItem.className = "list-group-item brand-item";
+            brandItem.className = "brand-item";
             brandItem.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center toggle-section" data-id="${brand.id}">
-                    <span>${brand.name}</span>
-                    <span class="section-toggle-icon">▼</span>
+                <div class="toggle-section" data-id="${brand.id}">
+                    <div class="brand-name-container">
+                        <span>${brand.name}</span>
+                        <img src="img_src/chevron-down-green.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                    </div>
+                    <button class="btn btn-danger btn-sm" data-id="${brand.id}">Удалить</button>
                 </div>
-                <div class="brand-sections-content" style="display: none;">
-                    <ul class="list-group mt-3">
-                        <li class="list-group-item">Описание бренда</li>
-                        <li class="list-group-item">Логотипы</li>
-                        <li class="list-group-item">Цвета и цветовые стили</li>
-                        <li class="list-group-item">Текстуры</li>
-                        <li class="list-group-item">Градиенты</li>
-                        <li class="list-group-item">Типографика</li>
-                        <li class="list-group-item">Ключевые персонажи/элементы</li>
-                        <li class="list-group-item">Тональность коммуникации</li>
-                        <li class="list-group-item">Стандарты сервиса</li>
-                        <li class="list-group-item">Графические элементы</li>
-                        <li class="list-group-item">Рекламные материалы</li>
-                        <li class="list-group-item">Стили бренда</li>
+                <div class="brand-sections-content">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span>Описание бренда</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Логотипы</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Цвета и цветовые стили</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Текстуры</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Градиенты</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Типографика</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Ключевые персонажи/элементы</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Тональность коммуникации</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Графические элементы</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
+                        <li class="list-group-item">
+                            <span>Рекламные материалы</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                        </li>
                     </ul>
                 </div>
             `;
@@ -88,40 +128,22 @@ document.addEventListener("DOMContentLoaded", () => {
             // Добавляем обработчик для сворачивания/разворачивания секции бренда
             const toggleSection = brandItem.querySelector(".toggle-section");
             const brandContent = brandItem.querySelector(".brand-sections-content");
-            toggleSection.addEventListener("click", () => {
+            const toggleIcon = toggleSection.querySelector(".section-toggle-icon");
+            toggleSection.addEventListener("click", (e) => {
+                if (e.target.tagName === "BUTTON") return; // Игнорируем клик по кнопке "Удалить"
                 const isVisible = brandContent.style.display === "block";
                 brandContent.style.display = isVisible ? "none" : "block";
-                const toggleIcon = toggleSection.querySelector(".section-toggle-icon");
-                toggleIcon.textContent = isVisible ? "▼" : "▲";
+                toggleIcon.src = isVisible ? "img_src/chevron-down-green.svg" : "img_src/chevron-up-green.svg";
             });
-        });
 
-        // Добавляем обработчики для кнопок удаления
-        document.querySelectorAll(".btn-danger").forEach((button) => {
-            console.log(`Добавлен обработчик для удаления бренда с ID: ${button.getAttribute("data-id")}`); // Отладочное сообщение
-            button.addEventListener("click", (e) => {
+            // Добавляем обработчик для кнопки удаления бренда
+            const deleteButton = brandItem.querySelector(".btn.btn-danger");
+            deleteButton.addEventListener("click", (e) => {
                 const brandId = parseInt(e.target.getAttribute("data-id"), 10);
                 console.log(`Удаляем бренд с ID: ${brandId}`); // Отладочное сообщение
 
                 brands = brands.filter((brand) => brand.id !== brandId);
                 renderBrands();
-                brandSections.innerHTML = ""; // Очищаем секции, если бренд удален
-            });
-        });
-
-        // Добавляем обработчики для клика по названию бренда
-        document.querySelectorAll(".brand-name").forEach((nameElement) => {
-            console.log(`Добавлен обработчик для бренда с ID: ${nameElement.getAttribute("data-id")}`); // Отладочное сообщение
-            nameElement.addEventListener("click", (e) => {
-                const brandId = parseInt(e.target.getAttribute("data-id"), 10);
-                console.log(`Клик по бренду с ID: ${brandId}`); // Отладочное сообщение
-
-                const selectedBrand = brands.find((brand) => brand.id === brandId);
-                if (selectedBrand) {
-                    renderBrandSections(selectedBrand);
-                } else {
-                    console.error(`Бренд с ID ${brandId} не найден`);
-                }
             });
         });
     }
