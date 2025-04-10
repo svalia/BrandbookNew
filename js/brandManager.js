@@ -40,41 +40,27 @@ export function validateBrand(brand) {
     return brand && brand.id && brand.name;
 }
 
-export function addBrand(brands, brandName) {
-    if (!Array.isArray(brands)) {
-        console.warn('brands не является массивом, создаем новый массив');
-        brands = [];
-    }
-    
-    if (!brandName || typeof brandName !== 'string' || !brandName.trim()) {
-        throw new Error('Название бренда не может быть пустым');
-    }
-
-    try {
-        const newBrand = createBrand(brandName.trim());
-        const updatedBrands = [...brands, newBrand];
-        
-        const saved = saveBrandsToStorage(updatedBrands);
-        if (!saved) {
-            throw new Error('Не удалось сохранить бренд');
-        }
-        
-        console.log('Бренд успешно добавлен:', newBrand);
-        return updatedBrands;
-    } catch (error) {
-        console.error('Ошибка при добавлении бренда:', error);
-        throw new Error('Не удалось добавить бренд: ' + error.message);
-    }
+export function addBrand(name) {
+    const brands = loadBrandsFromStorage() || [];
+    const newBrand = {
+        id: Date.now(),
+        name,
+        sections: {
+            brandDescription: { description: '' },
+            logos: { description: '', items: [] },
+            colors: { description: '', primary: [], secondary: [], paired: [], palettes: [], gradients: [] },
+            typography: { description: '', fonts: [], presets: [] },
+            // ...other sections...
+        },
+    };
+    brands.push(newBrand);
+    saveBrandsToStorage(brands);
 }
 
-export function deleteBrand(brands, brandId) {
-    if (!Array.isArray(brands)) {
-        console.warn('brands не является массивом. Сбрасываем в пустой массив.');
-        brands = [];
-    }
-    const updatedBrands = brands.filter(brand => brand.id !== parseInt(brandId));
-    saveBrandsToStorage(updatedBrands);
-    return updatedBrands;
+export function deleteBrand(id) {
+    let brands = loadBrandsFromStorage();
+    brands = brands.filter((brand) => brand.id !== id);
+    saveBrandsToStorage(brands);
 }
 
 export function updateSectionDescription(brands, brandId, sectionKey, description) {

@@ -1,13 +1,15 @@
 // Функции для работы с localStorage
 
+const STORAGE_KEY = 'brandbook_data';
+
 // Сохранение брендов в localStorage
 export function saveBrandsToStorage(brands) {
-    localStorage.setItem('brandbook_brands', JSON.stringify(brands));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(brands));
 }
 
 // Загрузка брендов из localStorage
 export function loadBrandsFromStorage() {
-    const data = localStorage.getItem('brandbook_brands');
+    const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
 }
 

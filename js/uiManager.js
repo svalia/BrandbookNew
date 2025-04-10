@@ -1,6 +1,7 @@
 import { saveBrandsToStorage, loadBrandsFromStorage } from './storageManager.js';
 import { addColorToPalette, deletePalette, updatePaletteColors, removeColorFromPalette } from './colorManager.js';
 import { addItem, deleteItem } from './itemManager.js';
+import { deleteBrand } from './brandManager.js';
 
 // Функции для управления пользовательским интерфейсом
 
@@ -296,8 +297,24 @@ export function initializeUIManager() {
     // Инициализация UI
 }
 
-export function renderBrands(brands) {
-    // Отрисовка брендов
+export function renderBrands(brands = []) {
+    const brandsList = document.getElementById('brandsList');
+    brandsList.innerHTML = '';
+
+    brands.forEach((brand) => {
+        const brandItem = document.createElement('div');
+        brandItem.className = 'brand-item d-flex justify-content-between align-items-center mb-2';
+        brandItem.innerHTML = `
+            <span>${brand.name}</span>
+            <button class="btn btn-danger btn-sm" data-id="${brand.id}">Удалить</button>
+        `;
+        brandsList.appendChild(brandItem);
+
+        brandItem.querySelector('button').addEventListener('click', () => {
+            deleteBrand(brand.id);
+            renderBrands(loadBrandsFromStorage());
+        });
+    });
 }
 
 export function renderBrandSections(brand) {

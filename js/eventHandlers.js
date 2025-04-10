@@ -1,9 +1,7 @@
 // Обработчики событий и инициализация
-import { addBrand, deleteBrand, updateSectionDescription } from './brandManager.js';
-import { loadBrandsFromStorage, saveBrandsToStorage } from './storageManager.js';
-import { renderBrands, editors, initializeUIManager } from './uiManager.js';
-import { validateLogoFile, calculateLogoValues, addLogo } from './logoManager.js';
-import { addColors, addPairedColors, addColorPalette, addColorToPalette, deletePalette } from './colorManager.js';
+import { addBrand } from './brandManager.js';
+import { saveBrandsToStorage, loadBrandsFromStorage } from './storageManager.js';
+import { renderBrands } from './uiManager.js';
 import { addItem } from './itemManager.js';  // Добавляем этот импорт
 import { initializeBrandManager } from './brandManager.js';
 
@@ -16,13 +14,47 @@ export function initializeApp() {
 // Настройка обработчиков событий
 function setupEventListeners() {
     document.getElementById('addBrandBtn').addEventListener('click', () => {
-        // Показать модальное окно добавления бренда
+        const brandName = prompt('Введите название бренда:');
+        if (brandName) {
+            addBrand(brandName);
+            renderBrands();
+        }
     });
-    
+
     document.getElementById('exportJsonBtn').addEventListener('click', exportToJson);
     document.getElementById('importJsonBtn').addEventListener('click', importFromJson);
 }
 
 function loadInitialData() {
-    // Загрузка данных из localStorage при старте
+    const brands = loadBrandsFromStorage();
+    renderBrands(brands);
+}
+
+function exportToJson() {
+    const brands = loadBrandsFromStorage();
+    const dataStr = JSON.stringify(brands, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'brands.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importFromJson() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            const data = JSON.parse(reader.result);
+            saveBrandsToStorage(data);
+            renderBrands(data);
+        };
+        reader.readAsText(file);
+    });
+    input.click();
 }
