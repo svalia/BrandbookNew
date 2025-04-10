@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Добавляем обработчики для сворачивания/разворачивания секций
         document.querySelectorAll(".toggle-section").forEach((section) => {
+            console.log(`Добавлен обработчик для секции: ${section.getAttribute("data-section")}`); // Отладочное сообщение
             section.addEventListener("click", (e) => {
                 const sectionElement = e.target;
                 const sectionName = sectionElement.getAttribute("data-section");
@@ -97,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         brandsList.innerHTML = "";
         brands.forEach((brand) => {
-            console.log(`Отображаем бренд: ${brand.name}`); // Отладочное сообщение
+            console.log(`Добавляем бренд в список: ${brand.name}`); // Отладочное сообщение
 
             const brandItem = document.createElement("div");
             brandItem.className = "list-group-item d-flex justify-content-between align-items-center";
@@ -110,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Добавляем обработчики для кнопок удаления
         document.querySelectorAll(".btn-danger").forEach((button) => {
+            console.log(`Добавлен обработчик для удаления бренда с ID: ${button.getAttribute("data-id")}`); // Отладочное сообщение
             button.addEventListener("click", (e) => {
                 const brandId = parseInt(e.target.getAttribute("data-id"), 10);
                 console.log(`Удаляем бренд с ID: ${brandId}`); // Отладочное сообщение
@@ -122,11 +124,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Добавляем обработчики для клика по названию бренда
         document.querySelectorAll(".brand-name").forEach((nameElement) => {
+            console.log(`Добавлен обработчик для бренда с ID: ${nameElement.getAttribute("data-id")}`); // Отладочное сообщение
             nameElement.addEventListener("click", (e) => {
                 const brandId = parseInt(e.target.getAttribute("data-id"), 10);
+                console.log(`Клик по бренду с ID: ${brandId}`); // Отладочное сообщение
+
                 const selectedBrand = brands.find((brand) => brand.id === brandId);
                 if (selectedBrand) {
                     renderBrandSections(selectedBrand);
+                } else {
+                    console.error(`Бренд с ID ${brandId} не найден`);
                 }
             });
         });
