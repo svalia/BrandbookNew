@@ -51,104 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Функция для отображения секций выбранного бренда
-    function renderBrandSections(brand) {
-        console.log(`Отображаем секции для бренда: ${brand.name}`); // Отладочное сообщение
-
-        brandSections.innerHTML = `
-            <div class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="brand">
-                <span>${brand.name}</span>
-                <span class="section-toggle-icon">▼</span>
-            </div>
-            <div class="brand-sections-content" style="display: none; padding: 15px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px;">
-                <ul class="list-group">
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="brandDescription">
-                        <span>Описание бренда</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="logos">
-                        <span>Логотипы</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="colors">
-                        <span>Цвета и цветовые стили</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="textures">
-                        <span>Текстуры</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="gradients">
-                        <span>Градиенты</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="typography">
-                        <span>Типографика</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="keyElements">
-                        <span>Ключевые персонажи/элементы</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="toneOfVoice">
-                        <span>Тональность коммуникации</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="serviceStandards">
-                        <span>Стандарты сервиса</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="graphicElements">
-                        <span>Графические элементы</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="advertisingMaterials">
-                        <span>Рекламные материалы</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                    <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="styleGuide">
-                        <span>Стили бренда</span>
-                        <span class="section-toggle-icon">▼</span>
-                    </li>
-                </ul>
-            </div>
-        `;
-
-        console.log("Секции бренда добавлены в DOM"); // Отладочное сообщение
-
-        // Добавляем обработчик для сворачивания/разворачивания секции бренда
-        const brandToggle = document.querySelector('[data-section="brand"]');
-        const brandContent = document.querySelector(".brand-sections-content");
-        brandToggle.addEventListener("click", () => {
-            brandContent.style.display = brandContent.style.display === "none" ? "block" : "none";
-            const toggleIcon = brandToggle.querySelector(".section-toggle-icon");
-            toggleIcon.textContent = brandContent.style.display === "block" ? "▲" : "▼";
-        });
-
-        // Добавляем обработчики для сворачивания/разворачивания дочерних секций
-        document.querySelectorAll(".toggle-section").forEach((section) => {
-            if (section.dataset.section !== "brand") {
-                console.log(`Добавлен обработчик для секции: ${section.getAttribute("data-section")}`); // Отладочное сообщение
-                section.addEventListener("click", (e) => {
-                    const sectionElement = e.currentTarget;
-                    const sectionName = sectionElement.getAttribute("data-section");
-                    console.log(`Клик по секции: ${sectionName}`); // Отладочное сообщение
-
-                    // Переключаем класс для отображения/скрытия
-                    sectionElement.classList.toggle("active");
-                    const toggleIcon = sectionElement.querySelector(".section-toggle-icon");
-                    if (sectionElement.classList.contains("active")) {
-                        console.log(`Секция ${sectionName} развернута`); // Отладочное сообщение
-                        toggleIcon.textContent = "▲"; // Меняем стрелку на "развернуто"
-                    } else {
-                        console.log(`Секция ${sectionName} свернута`); // Отладочное сообщение
-                        toggleIcon.textContent = "▼"; // Меняем стрелку на "свернуто"
-                    }
-                });
-            }
-        });
-    }
-
     // Функция для отображения списка брендов
     function renderBrands() {
         console.log("Обновляем список брендов"); // Отладочное сообщение
@@ -158,12 +60,40 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log(`Добавляем бренд в список: ${brand.name}`); // Отладочное сообщение
 
             const brandItem = document.createElement("div");
-            brandItem.className = "list-group-item d-flex justify-content-between align-items-center";
+            brandItem.className = "list-group-item brand-item";
             brandItem.innerHTML = `
-                <span class="brand-name" data-id="${brand.id}">${brand.name}</span>
-                <button class="btn btn-danger btn-sm" data-id="${brand.id}">Удалить</button>
+                <div class="d-flex justify-content-between align-items-center toggle-section" data-id="${brand.id}">
+                    <span>${brand.name}</span>
+                    <span class="section-toggle-icon">▼</span>
+                </div>
+                <div class="brand-sections-content" style="display: none;">
+                    <ul class="list-group mt-3">
+                        <li class="list-group-item">Описание бренда</li>
+                        <li class="list-group-item">Логотипы</li>
+                        <li class="list-group-item">Цвета и цветовые стили</li>
+                        <li class="list-group-item">Текстуры</li>
+                        <li class="list-group-item">Градиенты</li>
+                        <li class="list-group-item">Типографика</li>
+                        <li class="list-group-item">Ключевые персонажи/элементы</li>
+                        <li class="list-group-item">Тональность коммуникации</li>
+                        <li class="list-group-item">Стандарты сервиса</li>
+                        <li class="list-group-item">Графические элементы</li>
+                        <li class="list-group-item">Рекламные материалы</li>
+                        <li class="list-group-item">Стили бренда</li>
+                    </ul>
+                </div>
             `;
             brandsList.appendChild(brandItem);
+
+            // Добавляем обработчик для сворачивания/разворачивания секции бренда
+            const toggleSection = brandItem.querySelector(".toggle-section");
+            const brandContent = brandItem.querySelector(".brand-sections-content");
+            toggleSection.addEventListener("click", () => {
+                const isVisible = brandContent.style.display === "block";
+                brandContent.style.display = isVisible ? "none" : "block";
+                const toggleIcon = toggleSection.querySelector(".section-toggle-icon");
+                toggleIcon.textContent = isVisible ? "▼" : "▲";
+            });
         });
 
         // Добавляем обработчики для кнопок удаления
