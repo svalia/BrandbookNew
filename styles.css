@@ -27,3 +27,23 @@ h1 {
 .list-group-item button {
     font-size: 0.875rem;
 }
+
+.toggle-section {
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-section.active {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.section-toggle-icon {
+    font-size: 1.2rem;
+    color: #6c757d;
+    transition: transform 0.3s ease;
+}
+
+.toggle-section.active .section-toggle-icon {
+    color: #000;
+}

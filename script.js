@@ -58,18 +58,54 @@ document.addEventListener("DOMContentLoaded", () => {
         brandSections.innerHTML = `
             <h3>Секции бренда: ${brand.name}</h3>
             <ul class="list-group">
-                <li class="list-group-item toggle-section" data-section="brandDescription">Описание бренда</li>
-                <li class="list-group-item toggle-section" data-section="logos">Логотипы</li>
-                <li class="list-group-item toggle-section" data-section="colors">Цвета и цветовые стили</li>
-                <li class="list-group-item toggle-section" data-section="textures">Текстуры</li>
-                <li class="list-group-item toggle-section" data-section="gradients">Градиенты</li>
-                <li class="list-group-item toggle-section" data-section="typography">Типографика</li>
-                <li class="list-group-item toggle-section" data-section="keyElements">Ключевые персонажи/элементы</li>
-                <li class="list-group-item toggle-section" data-section="toneOfVoice">Тональность коммуникации</li>
-                <li class="list-group-item toggle-section" data-section="serviceStandards">Стандарты сервиса</li>
-                <li class="list-group-item toggle-section" data-section="graphicElements">Графические элементы</li>
-                <li class="list-group-item toggle-section" data-section="advertisingMaterials">Рекламные материалы</li>
-                <li class="list-group-item toggle-section" data-section="styleGuide">Стили бренда</li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="brandDescription">
+                    <span>Описание бренда</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="logos">
+                    <span>Логотипы</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="colors">
+                    <span>Цвета и цветовые стили</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="textures">
+                    <span>Текстуры</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="gradients">
+                    <span>Градиенты</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="typography">
+                    <span>Типографика</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="keyElements">
+                    <span>Ключевые персонажи/элементы</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="toneOfVoice">
+                    <span>Тональность коммуникации</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="serviceStandards">
+                    <span>Стандарты сервиса</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="graphicElements">
+                    <span>Графические элементы</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="advertisingMaterials">
+                    <span>Рекламные материалы</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
+                <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="styleGuide">
+                    <span>Стили бренда</span>
+                    <span class="section-toggle-icon">▼</span>
+                </li>
             </ul>
         `;
 
@@ -79,18 +115,19 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".toggle-section").forEach((section) => {
             console.log(`Добавлен обработчик для секции: ${section.getAttribute("data-section")}`); // Отладочное сообщение
             section.addEventListener("click", (e) => {
-                const sectionElement = e.target;
+                const sectionElement = e.currentTarget;
                 const sectionName = sectionElement.getAttribute("data-section");
                 console.log(`Клик по секции: ${sectionName}`); // Отладочное сообщение
 
                 // Переключаем класс для отображения/скрытия
                 sectionElement.classList.toggle("active");
+                const toggleIcon = sectionElement.querySelector(".section-toggle-icon");
                 if (sectionElement.classList.contains("active")) {
                     console.log(`Секция ${sectionName} развернута`); // Отладочное сообщение
-                    sectionElement.innerHTML = `${sectionElement.textContent} (развернуто)`;
+                    toggleIcon.textContent = "▲"; // Меняем стрелку на "развернуто"
                 } else {
                     console.log(`Секция ${sectionName} свернута`); // Отладочное сообщение
-                    sectionElement.innerHTML = sectionElement.textContent.replace(" (развернуто)", "");
+                    toggleIcon.textContent = "▼"; // Меняем стрелку на "свернуто"
                 }
             });
         });
