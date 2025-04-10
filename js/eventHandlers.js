@@ -13,18 +13,25 @@ export function initializeApp() {
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    document.getElementById('addBrandBtn').addEventListener('click', () => {
-        const brandName = prompt('Введите название бренда:');
-        if (brandName && brandName.trim() !== '') {
-            const brands = loadBrandsFromStorage();
-            addBrand(brandName, brands);
-            saveBrandsToStorage(brands);
-            renderBrands(brands);
-        } else {
-            alert('Название бренда не может быть пустым.');
-        }
-    });
+    // Привязываем обработчик к кнопке "Добавить бренд"
+    const addBrandBtn = document.getElementById('addBrandBtn');
+    if (addBrandBtn) {
+        addBrandBtn.addEventListener('click', () => {
+            const brandName = prompt('Введите название бренда:');
+            if (brandName && brandName.trim() !== '') {
+                const brands = loadBrandsFromStorage();
+                addBrand(brandName, brands);
+                saveBrandsToStorage(brands);
+                renderBrands(brands);
+            } else {
+                alert('Название бренда не может быть пустым.');
+            }
+        });
+    } else {
+        console.error('Кнопка "Добавить бренд" не найдена в DOM.');
+    }
 
+    // Привязываем обработчики для экспорта и импорта JSON
     document.getElementById('exportJsonBtn').addEventListener('click', exportToJson);
     document.getElementById('importJsonBtn').addEventListener('click', importFromJson);
 }

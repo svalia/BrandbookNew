@@ -28,12 +28,9 @@
 // Основной файл приложения
 import { initializeBrandManager } from './brandManager.js';
 import { initializeUIManager } from './uiManager.js';
-import { initializeEventHandlers } from './eventHandlers.js';
 import { initializeStorageManager } from './storageManager.js';
 import { initializeColorManager } from './colorManager.js';
 import { initializeApp } from './eventHandlers.js';
 
 // Инициализация приложения при загрузке DOM
-document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
-});
+document.addEventListener('DOMContentLoaded', initializeApp);
