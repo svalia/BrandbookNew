@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 sections: {} // Пустые секции для будущей реализации
             };
             brands.push(newBrand);
+            console.log("Текущий список брендов:", brands); // Отладочное сообщение
             renderBrands();
             addBrandForm.reset();
 
@@ -48,6 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         brandsList.innerHTML = "";
         brands.forEach((brand) => {
+            console.log(`Отображаем бренд: ${brand.name}`); // Отладочное сообщение
+
             const brandItem = document.createElement("div");
             brandItem.className = "list-group-item d-flex justify-content-between align-items-center";
             brandItem.innerHTML = `
