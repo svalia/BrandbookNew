@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const brandsList = document.getElementById("brandsList");
     const addBrandForm = document.getElementById("addBrandForm");
     const brandSections = document.getElementById("brandSections");
+    const addBrandButton = document.querySelector('[data-bs-target="#addBrandModal"]'); // Кнопка "Добавить бренд"
 
     // Проверяем, что элементы найдены
     if (!brandsList || !addBrandForm || !brandSections) {
@@ -36,6 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const addBrandModal = bootstrap.Modal.getInstance(document.getElementById("addBrandModal"));
             if (addBrandModal) {
                 addBrandModal.hide();
+                // Переносим фокус на кнопку "Добавить бренд"
+                if (addBrandButton) {
+                    addBrandButton.focus();
+                }
             } else {
                 console.error("Не удалось получить экземпляр модального окна");
             }
