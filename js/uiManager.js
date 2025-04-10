@@ -311,8 +311,10 @@ export function renderBrands(brands = []) {
         brandsList.appendChild(brandItem);
 
         brandItem.querySelector('button').addEventListener('click', () => {
-            deleteBrand(brand.id);
-            renderBrands(loadBrandsFromStorage());
+            const brands = loadBrandsFromStorage();
+            const updatedBrands = brands.filter((b) => b.id !== brand.id);
+            saveBrandsToStorage(updatedBrands);
+            renderBrands(updatedBrands);
         });
     });
 }

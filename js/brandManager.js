@@ -40,8 +40,7 @@ export function validateBrand(brand) {
     return brand && brand.id && brand.name;
 }
 
-export function addBrand(name) {
-    const brands = loadBrandsFromStorage() || [];
+export function addBrand(name, brands) {
     const newBrand = {
         id: Date.now(),
         name,
@@ -54,7 +53,6 @@ export function addBrand(name) {
         },
     };
     brands.push(newBrand);
-    saveBrandsToStorage(brands);
 }
 
 export function deleteBrand(id) {

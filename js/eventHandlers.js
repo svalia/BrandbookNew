@@ -15,9 +15,13 @@ export function initializeApp() {
 function setupEventListeners() {
     document.getElementById('addBrandBtn').addEventListener('click', () => {
         const brandName = prompt('Введите название бренда:');
-        if (brandName) {
-            addBrand(brandName);
-            renderBrands();
+        if (brandName && brandName.trim() !== '') {
+            const brands = loadBrandsFromStorage();
+            addBrand(brandName, brands);
+            saveBrandsToStorage(brands);
+            renderBrands(brands);
+        } else {
+            alert('Название бренда не может быть пустым.');
         }
     });
 
