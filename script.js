@@ -57,10 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         brandSections.innerHTML = `
             <div class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="brand">
-                <span>Секции бренда: ${brand.name}</span>
+                <span>${brand.name}</span>
                 <span class="section-toggle-icon">▼</span>
             </div>
-            <div class="brand-sections-content" style="display: none;">
+            <div class="brand-sections-content" style="display: none; padding: 15px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px;">
                 <ul class="list-group">
                     <li class="list-group-item toggle-section d-flex justify-content-between align-items-center" data-section="brandDescription">
                         <span>Описание бренда</span>

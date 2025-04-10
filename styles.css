@@ -51,4 +51,12 @@ h1 {
 
 .brand-sections-content {
     padding-left: 20px; /* Отступ для вложенных секций */
+    background-color: #fff;
+    border-radius: 0 0 5px 5px;
+    margin-top: -1px; /* Убираем двойную границу */
+}
+
+.brand-sections-content .list-group-item {
+    border: none;
+    padding-left: 20px; /* Отступ для вложенности */
 }
