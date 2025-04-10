@@ -37,10 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const addBrandModal = bootstrap.Modal.getInstance(document.getElementById("addBrandModal"));
             if (addBrandModal) {
                 addBrandModal.hide();
-                // Переносим фокус на кнопку "Добавить бренд"
-                if (addBrandButton) {
-                    addBrandButton.focus();
-                }
+                // Добавляем задержку перед переносом фокуса
+                setTimeout(() => {
+                    if (addBrandButton) {
+                        addBrandButton.focus();
+                    }
+                }, 300); // Задержка в 300 мс
             } else {
                 console.error("Не удалось получить экземпляр модального окна");
             }
