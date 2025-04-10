@@ -36,6 +36,7 @@ h1 {
 .toggle-section.active {
     background-color: #f8f9fa;
     font-weight: bold;
+    color: #212529; /* Исправлено для видимости текста */
 }
 
 .section-toggle-icon {
@@ -46,4 +47,8 @@ h1 {
 
 .toggle-section.active .section-toggle-icon {
     color: #000;
+}
+
+.brand-sections-content {
+    padding-left: 20px; /* Отступ для вложенных секций */
 }
