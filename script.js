@@ -80,46 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="brand-sections-content">
                     <ul class="list-group">
-                        <li class="list-group-item">
-                            <span>Описание бренда</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Логотипы</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Цвета и цветовые стили</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Текстуры</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Градиенты</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Типографика</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Ключевые персонажи/элементы</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Тональность коммуникации</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Графические элементы</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
-                        <li class="list-group-item">
-                            <span>Рекламные материалы</span>
-                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
-                        </li>
+                        ${renderSections()}
                     </ul>
                 </div>
             `;
@@ -145,6 +106,124 @@ document.addEventListener("DOMContentLoaded", () => {
                 brands = brands.filter((brand) => brand.id !== brandId);
                 renderBrands();
             });
+
+            // Добавляем обработчик для кнопки "Добавить описание"
+            const addDescriptionButtons = brandItem.querySelectorAll(".add-description-btn");
+            addDescriptionButtons.forEach((button) => {
+                button.addEventListener("click", (e) => {
+                    const descriptionContent = e.target.closest(".description-block").querySelector(".description-content");
+                    openEditor(descriptionContent);
+                });
+            });
+        });
+    }
+
+    function renderSections() {
+        const sections = [
+            "Описание бренда", "Логотипы", "Цвета и цветовые стили", 
+            "Текстуры", "Градиенты", "Типографика",
+            "Ключевые персонажи/элементы", "Тональность коммуникации",
+            "Графические элементы", "Рекламные материалы"
+        ];
+
+        return sections.map(section => `
+            <li class="list-group-item section-item">
+                <div class="section-header">
+                    <span>${section}</span>
+                    <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                </div>
+                <div class="section-content" style="display: none;">
+                    <div class="description-block">
+                        <div class="description-content"></div>
+                        <button class="add-description-btn">
+                            <span>Добавить описание</span>
+                        </button>
+                    </div>
+                </div>
+            </li>
+        `).join('');
+    }
+
+    function openEditor(targetElement) {
+        const editorModal = document.createElement("div");
+        editorModal.className = "editor-modal";
+        editorModal.innerHTML = `
+            <div class="editor-container">
+                <div class="editor-toolbar">
+                    <button data-action="h1">H1</button>
+                    <button data-action="h2">H2</button>
+                    <button data-action="h3">H3</button>
+                    <button data-action="h4">H4</button>
+                    <button data-action="bold">B</button>
+                    <button data-action="italic">I</button>
+                    <button data-action="ul">•</button>
+                    <button data-action="ol">1.</button>
+                </div>
+                <div class="editor-content">
+                    <textarea id="wysiwyg-editor" maxlength="10000" placeholder="Добавьте описание"></textarea>
+                </div>
+                <div class="editor-actions">
+                    <button class="btn-cancel">Отмена</button>
+                    <button class="btn-save">Сохранить</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(editorModal);
+
+        const textarea = editorModal.querySelector("#wysiwyg-editor");
+        const toolbar = editorModal.querySelector(".editor-toolbar");
+
+        // Обработчики кнопок форматирования
+        toolbar.addEventListener("click", (e) => {
+            const action = e.target.dataset.action;
+            if (!action) return;
+
+            const actions = {
+                h1: '# ',
+                h2: '## ',
+                h3: '### ',
+                h4: '#### ',
+                bold: '**',
+                italic: '_',
+                ul: '- ',
+                ol: '1. '
+            };
+
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selected = textarea.value.substring(start, end);
+            
+            switch(action) {
+                case 'bold':
+                case 'italic':
+                    textarea.value = textarea.value.substring(0, start) + 
+                                   actions[action] + selected + actions[action] +
+                                   textarea.value.substring(end);
+                    break;
+                case 'ul':
+                case 'ol':
+                case 'h1':
+                case 'h2':
+                case 'h3':
+                case 'h4':
+                    textarea.value = textarea.value.substring(0, start) +
+                                   actions[action] + selected +
+                                   textarea.value.substring(end);
+                    break;
+            }
+        });
+
+        // Обработчики кнопок "Сохранить" и "Отмена"
+        const saveButton = editorModal.querySelector(".btn-save");
+        const cancelButton = editorModal.querySelector(".btn-cancel");
+
+        saveButton.addEventListener("click", () => {
+            targetElement.innerHTML = textarea.value;
+            document.body.removeChild(editorModal);
+        });
+
+        cancelButton.addEventListener("click", () => {
+            document.body.removeChild(editorModal);
         });
     }
 });

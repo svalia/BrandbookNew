@@ -213,3 +213,105 @@ h1 {
     align-items: center;
     gap: 8px; /* Расстояние между названием бренда и шевроном */
 }
+
+.section-item {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(175, 175, 175, 0.33);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #4A4C4B;
+    font-size: 16px;
+    font-family: 'SB Sans Display', sans-serif;
+    font-weight: 600;
+}
+
+.editor-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.editor-container {
+    width: 946px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #E4E4E4;
+    overflow: hidden;
+}
+
+.editor-toolbar {
+    padding: 8px 20px;
+    background: white;
+    border-bottom: 1px solid #E4E4E4;
+    display: flex;
+    gap: 10px;
+}
+
+.editor-content {
+    padding: 10px;
+    background: #F6F3F3;
+}
+
+#wysiwyg-editor {
+    width: 100%;
+    min-height: 165px;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    font-family: 'SB Sans Display', sans-serif;
+    font-size: 16px;
+    resize: vertical;
+}
+
+.editor-actions {
+    padding: 12px 20px;
+    display: flex;
+    gap: 9px;
+}
+
+.btn-save, .btn-cancel {
+    width: 176px;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: 'SB Sans Display', sans-serif;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-save {
+    background: #1D953C;
+    color: white;
+    border: none;
+}
+
+.btn-cancel {
+    background: white;
+    color: #1D953C;
+    border: 1px solid #1D953C;
+}
+
+.add-description-btn {
+    padding: 6px 12px;
+    background: #1D953C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-family: 'SB Sans Display', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
