@@ -339,6 +339,27 @@ h1 {
 .formatted-description h4 {
     margin: 10px 0;
     font-weight: 600;
+    color: #4A4C4B; /* Устанавливаем цвет текста */
+    text-align: left; /* Убираем возможное центрирование */
+    padding: 0; /* Убираем отступы */
+    margin-left: 0; /* Убираем левый отступ */
+}
+
+.formatted-description h1 {
+    font-size: 24px; /* Размер для Заголовка 1 */
+    color: #1D953C; /* Устанавливаем зелёный цвет только для h1 */
+}
+
+.formatted-description h2 {
+    font-size: 20px;
+}
+
+.formatted-description h3 {
+    font-size: 18px;
+}
+
+.formatted-description h4 {
+    font-size: 16px;
 }
 
 .formatted-description ul {
