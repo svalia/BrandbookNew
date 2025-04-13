@@ -458,3 +458,32 @@ h1 {
     line-height: 1.5; /* Увеличиваем межстрочный интервал для читаемости */
     margin-top: 10px;
 }
+
+.calculated-values-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.calculated-values-hint {
+    background-color: #e7f3ff; /* Голубой фон */
+    border-radius: 8px; /* Закруглённые края */
+    padding: 10px 15px;
+    font-size: 12px; /* Мелкий текст */
+    color: #0d6efd; /* Тёмно-голубой текст */
+    margin-bottom: 15px;
+}
+
+.calculated-values-hint p {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.calculated-values-hint ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.calculated-values-hint li {
+    margin-bottom: 5px;
+}

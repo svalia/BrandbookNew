@@ -288,18 +288,51 @@ document.addEventListener("DOMContentLoaded", () => {
         customColorField.style.display = logoColorSelect.value === "custom" ? "block" : "none";
     });
 
+    const logoWidthInput = document.getElementById("logoWidth");
+    const logoHeightInput = document.getElementById("logoHeight");
+    const iconWidthPxInput = document.getElementById("iconWidthPx");
+    const letterBHeightInput = document.getElementById("letterBHeight");
+    const calculatedIconWidthElement = document.getElementById("calculatedIconWidth");
+    const calculatedSafeZoneElement = document.getElementById("calculatedSafeZone");
+
+    // Функция для нормализации дробных чисел
+    function normalizeNumber(value) {
+        return parseFloat(value.replace(",", ".").replace(/[^0-9.]/g, "")) || 0;
+    }
+
+    // Функция для расчёта значений
+    function calculateValues() {
+        const logoWidth = normalizeNumber(logoWidthInput.value);
+        const logoHeight = normalizeNumber(logoHeightInput.value);
+        const iconWidthPx = normalizeNumber(iconWidthPxInput.value);
+        const letterBHeight = normalizeNumber(letterBHeightInput.value);
+
+        // Расчёт половины ширины иконки
+        const iconWidthPercent = logoWidth > 0 ? ((iconWidthPx / logoWidth) * 100) / 2 : 0;
+
+        // Расчёт охранного поля
+        const safeZonePercent = logoHeight > 0 ? (letterBHeight / logoHeight) * 100 : 0;
+
+        // Обновляем значения в текстовых элементах
+        calculatedIconWidthElement.textContent = iconWidthPercent.toFixed(3);
+        calculatedSafeZoneElement.textContent = safeZonePercent.toFixed(3);
+    }
+
+    // Добавляем обработчики для ввода данных
+    [logoWidthInput, logoHeightInput, iconWidthPxInput, letterBHeightInput].forEach((input) => {
+        input.addEventListener("input", () => {
+            input.value = input.value.replace(",", "."); // Заменяем запятые на точки
+            calculateValues(); // Пересчитываем значения
+        });
+    });
+
     // Обработчик формы добавления логотипа
     addLogoForm.addEventListener("submit", (e) => {
         e.preventDefault();
 
         const logoFile = document.getElementById("logoFile").files[0];
-        const logoColor = document.getElementById("logoColor").value;
-        const customColor = document.getElementById("customColor").value;
-        const logoLanguage = document.getElementById("logoLanguage").value;
-        const logoType = document.getElementById("logoType").value;
-        const logoOrientation = document.getElementById("logoOrientation").value;
-        const iconWidth = document.getElementById("iconWidth").value;
-        const safeZone = document.getElementById("safeZone").value;
+        const logoWidth = parseFloat(calculatedIconWidthElement.textContent);
+        const safeZone = parseFloat(calculatedSafeZoneElement.textContent);
 
         if (!logoFile) {
             alert("Выберите файл логотипа.");
@@ -313,34 +346,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 name: logoFile.name,
                 image: reader.result,
                 properties: {
-                    color: logoColor === "custom" ? customColor : logoColor,
-                    language: logoLanguage,
-                    type: logoType,
-                    orientation: logoOrientation,
-                    iconWidth: `${iconWidth}%`,
-                    safeZone: `${safeZone}%`
+                    iconWidth: `${logoWidth}%`,
+                    safeZone: `${safeZone}%`,
                 }
             };
 
-            // Находим галерею логотипов в текущей секции
+            // Добавляем логотип в галерею
             const logosGallery = document.querySelector(".logos-gallery");
             if (!logosGallery) {
                 console.error("Галерея логотипов не найдена.");
                 return;
             }
 
-            // Добавляем логотип в галерею
             const logoCard = document.createElement("div");
             logoCard.className = "logo-card";
             logoCard.innerHTML = `
                 <img src="${logoData.image}" alt="${logoData.name}" class="logo-preview">
                 <div class="logo-details">
                     <p><strong>Название:</strong> ${logoData.name}</p>
-                    <p><strong>Цвет:</strong> ${logoData.properties.color}</p>
-                    <p><strong>Язык:</strong> ${logoData.properties.language}</p>
-                    <p><strong>Тип:</strong> ${logoData.properties.type}</p>
-                    <p><strong>Ориентация:</strong> ${logoData.properties.orientation}</p>
-                    <p><strong>Ширина иконки:</strong> ${logoData.properties.iconWidth}</p>
+                    <p><strong>Половина ширины иконки:</strong> ${logoData.properties.iconWidth}</p>
                     <p><strong>Охранное поле:</strong> ${logoData.properties.safeZone}</p>
                 </div>
             `;
@@ -348,7 +372,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Сбрасываем форму
             addLogoForm.reset();
-            document.getElementById("customColorField").style.display = "none";
 
             // Закрываем модальное окно
             const addLogoModal = bootstrap.Modal.getInstance(document.getElementById("addLogoModal"));

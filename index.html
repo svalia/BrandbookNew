@@ -93,13 +93,52 @@
                                 <option value="square">Квадратный</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label for="iconWidth" class="form-label">Половина ширины иконки (%)</label>
-                            <input type="number" class="form-control" id="iconWidth" min="0" max="100" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="logoWidth" class="form-label">Ширина логотипа (px)</label>
+                                <input type="text" class="form-control" id="logoWidth" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="logoHeight" class="form-label">Высота логотипа (px)</label>
+                                <input type="text" class="form-control" id="logoHeight" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="safeZone" class="form-label">Охранное поле (%)</label>
-                            <input type="number" class="form-control" id="safeZone" min="0" max="100" step="0.01" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="iconWidthPx" class="form-label">Ширина иконки (px)</label>
+                                <input type="text" class="form-control" id="iconWidthPx" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="letterBHeight" class="form-label">Высота буквы "Б" (px)</label>
+                                <input type="text" class="form-control" id="letterBHeight" required>
+                            </div>
+                        </div>
+                        <h6 class="calculated-values-title mt-4">Расчётные значения</h6>
+                        <div class="calculated-values-hint">
+                            <p><strong>1. Половина ширины иконки (%)</strong></p>
+                            <ul>
+                                <li>Это значение используется для правильного позиционирования текста (заголовка и подзаголовка) относительно иконки.</li>
+                                <li>Текст должен начинаться от середины иконки.</li>
+                                <li>Вычисляется как процент от общей ширины логотипа.</li>
+                                <li>При масштабировании логотипа отношение сохраняется, обеспечивая правильное выравнивание текста.</li>
+                            </ul>
+                            <p><strong>2. Охранное поле (%)</strong></p>
+                            <ul>
+                                <li>Вычисляется на основе высоты буквы "Б" относительно общей высоты логотипа.</li>
+                                <li>Определяет минимальное пространство вокруг логотипа, которое должно оставаться свободным.</li>
+                                <li>При масштабировании логотипа охранное поле автоматически пропорционально изменяется.</li>
+                                <li>Сохраняет правильные пропорции защитного пространства.</li>
+                            </ul>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Половина ширины иконки (%)</label>
+                                <p id="calculatedIconWidth" class="form-control-static">0.000</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Охранное поле (%)</label>
+                                <p id="calculatedSafeZone" class="form-control-static">0.000</p>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Добавить</button>
                     </form>
