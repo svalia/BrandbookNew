@@ -111,15 +111,21 @@ document.addEventListener("DOMContentLoaded", () => {
             sectionItems.forEach(item => {
                 const sectionHeader = item.querySelector(".section-header");
                 const sectionContent = item.querySelector(".section-content");
-                const sectionIcon = sectionHeader.querySelector(".section-toggle-icon");
+                const sectionIcon = sectionHeader ? sectionHeader.querySelector(".section-toggle-icon") : null;
 
-                sectionHeader.addEventListener("click", () => {
-                    const isVisible = sectionContent.style.display === "block";
-                    sectionContent.style.display = isVisible ? "none" : "block";
-                    sectionIcon.src = isVisible ? 
-                        "img_src/chevron-down-gray.svg" : 
-                        "img_src/chevron-up-gray.svg";
-                });
+                if (sectionHeader && sectionContent) {
+                    sectionHeader.addEventListener("click", () => {
+                        const isVisible = sectionContent.style.display === "block";
+                        sectionContent.style.display = isVisible ? "none" : "block";
+                        if (sectionIcon) {
+                            sectionIcon.src = isVisible ? 
+                                "img_src/chevron-down-gray.svg" : 
+                                "img_src/chevron-up-gray.svg";
+                        }
+                    });
+                } else {
+                    console.warn("Не удалось найти элементы sectionHeader или sectionContent для секции:", item);
+                }
             });
 
             // Добавляем обработчик для кнопки удаления бренда
@@ -134,18 +140,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Добавляем обработчик для кнопки "Добавить описание"
             const addDescriptionButtons = brandItem.querySelectorAll(".add-description-btn");
-            addDescriptionButtons.forEach((button) => {
-                button.addEventListener("click", (e) => {
-                    const descriptionContent = e.target.closest(".description-block").querySelector(".description-content");
-                    openEditor(descriptionContent);
+            if (addDescriptionButtons && addDescriptionButtons.length > 0) {
+                addDescriptionButtons.forEach((button) => {
+                    if (button) {
+                        button.addEventListener("click", (e) => {
+                            const descriptionBlock = e.target.closest(".description-block");
+                            if (descriptionBlock) {
+                                const descriptionContent = descriptionBlock.querySelector(".description-content");
+                                if (descriptionContent) {
+                                    openEditor(descriptionContent);
+                                } else {
+                                    console.warn("Не удалось найти элемент description-content");
+                                }
+                            } else {
+                                console.warn("Не удалось найти родительский элемент description-block");
+                            }
+                        });
+                    }
                 });
-            });
+            } else {
+                console.warn("Кнопки 'Добавить описание' не найдены");
+            }
         });
     }
 
     function renderSections() {
         const sections = [
-            "Описание бренда", "Тональность коммуникации", "Логотипы", "Цвета и цветовые стили", "Типографика", 
+            "Описание бренда", 
+            "Тональность коммуникации", 
+            "Логотипы", 
+            "Цвета и цветовые стили", 
+            "Типографика", 
             "Текстуры, Градиенты, Ключевые персонажи/элементы, Графические элементы и Рекламные материалы"
         ];
 
@@ -162,6 +187,33 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="description-content"></div>
                         <button class="add-description-btn btn btn-primary">Добавить описание</button>
                     </div>
+                    ${section === "Цвета и цветовые стили" ? `
+                        <div class="color-actions mt-3">
+                            <button class="add-description-btn btn btn-primary" id="addColor">Добавить цвет</button>
+                            <button class="add-description-btn btn btn-primary" id="addPairedColors">Добавить парные цвета</button>
+                            <button class="add-description-btn btn btn-primary" id="addPalette">Добавить палитру</button>
+                        </div>
+                        <div id="colorBlocks">
+                            <div class="color-block" id="mainColorsBlock" style="display: none;">
+                                <h3>Основные и дополнительные цвета</h3>
+                                <div class="color-gallery" id="mainColorsGallery">
+                                    <!-- Карточки цветов будут добавляться здесь -->
+                                </div>
+                            </div>
+                            <div class="color-block" id="pairedColorsBlock" style="display: none;">
+                                <h3>Парные цвета</h3>
+                                <div class="paired-colors-gallery" id="pairedColorsGallery">
+                                    <!-- Карточки парных цветов будут добавляться здесь -->
+                                </div>
+                            </div>
+                            <div class="color-block" id="palettesBlock" style="display: none;">
+                                <h3>Палитры цветов</h3>
+                                <div class="palettes-gallery" id="palettesGallery">
+                                    <!-- Карточки палитр будут добавляться здесь -->
+                                </div>
+                            </div>
+                        </div>
+                    ` : ""}
                     ${section === "Логотипы" ? `
                         <button class="btn btn-success mt-3 add-logo-btn" data-bs-toggle="modal" data-bs-target="#addLogoModal">Добавить логотип</button>
                         <div class="logos-gallery mt-4">
@@ -172,6 +224,35 @@ document.addEventListener("DOMContentLoaded", () => {
             </li>
         `).join('');
     }
+
+    // Корректировка обработки кнопок управления цветами
+    setTimeout(() => {
+        const addColorButton = document.getElementById("addColor");
+        const addPairedColorsButton = document.getElementById("addPairedColors");
+        const addPaletteButton = document.getElementById("addPalette");
+        
+        const mainColorsBlock = document.getElementById("mainColorsBlock");
+        const pairedColorsBlock = document.getElementById("pairedColorsBlock");
+        const palettesBlock = document.getElementById("palettesBlock");
+        
+        if (addColorButton && mainColorsBlock) {
+            addColorButton.addEventListener("click", function() {
+                mainColorsBlock.style.display = "block";
+            });
+        }
+        
+        if (addPairedColorsButton && pairedColorsBlock) {
+            addPairedColorsButton.addEventListener("click", function() {
+                pairedColorsBlock.style.display = "block";
+            });
+        }
+        
+        if (addPaletteButton && palettesBlock) {
+            addPaletteButton.addEventListener("click", function() {
+                palettesBlock.style.display = "block";
+            });
+        }
+    }, 1000); // Небольшая задержка для гарантии загрузки DOM
 
     function openEditor(targetElement, existingContent = "") {
         const editorModal = document.createElement("div");
