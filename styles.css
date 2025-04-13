@@ -430,6 +430,7 @@ h1 {
 }
 
 .logo-card {
+    position: relative; /* Для позиционирования кнопки удаления */
     background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -439,6 +440,25 @@ h1 {
     text-align: center;
     overflow: hidden; /* Убираем выход текста за границы */
     word-wrap: break-word; /* Переносим длинные слова */
+}
+
+.delete-logo-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 16px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.delete-logo-btn:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.delete-icon {
+    width: 16px;
+    height: 16px;
 }
 
 .logo-preview {
@@ -457,4 +477,62 @@ h1 {
     text-align: left;
     line-height: 1.5; /* Увеличиваем межстрочный интервал для читаемости */
     margin-top: 10px;
+}
+
+.calculated-values-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.calculated-values-hint {
+    background-color: #e7f3ff; /* Голубой фон */
+    border-radius: 8px; /* Закруглённые края */
+    padding: 10px 15px;
+    font-size: 12px; /* Мелкий текст */
+    color: #212529; 
+    margin-bottom: 15px;
+    display: none; /* Скрываем по умолчанию */
+}
+
+.calculated-values-hint.show {
+    display: block; /* Показываем при разворачивании */
+}
+
+.calculated-values-hint p {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.calculated-values-hint ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.calculated-values-hint li {
+    margin-bottom: 5px;
+}
+
+.toggle-hint-header {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: #212529;
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.toggle-hint-header:hover {
+    background-color: #e9ecef;
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.toggle-icon.collapsed {
+    transform: rotate(-90deg);
 }
