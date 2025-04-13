@@ -449,92 +449,83 @@ document.addEventListener("DOMContentLoaded", () => {
         return null;
     }
 
+    // Обновим функцию добавления цветов
+    function addColorsToActiveBrand(colorValues, brandId) {
+        const activeBrand = brands.find(brand => brand.id === brandId);
+        if (!activeBrand) {
+            console.error("Активный бренд не найден.");
+            return;
+        }
+
+        if (!activeBrand.sections.colors) {
+            activeBrand.sections.colors = { primary: [] };
+        } else if (!activeBrand.sections.colors.primary) {
+            activeBrand.sections.colors.primary = [];
+        }
+
+        const mainColorsBlock = document.querySelector(`#brandsList .brand-item[data-id="${brandId}"] #mainColorsBlock`);
+        const colorGallery = mainColorsBlock ? mainColorsBlock.querySelector("#mainColorsGallery") : null;
+
+        if (!colorGallery) {
+            console.error("Галерея цветов не найдена для бренда:", brandId);
+            return;
+        }
+
+        mainColorsBlock.style.display = "block";
+
+        colorValues.forEach(colorHex => {
+            if (colorHex) {
+                const formattedHex = colorHex.startsWith("#") ? colorHex : `#${colorHex}`;
+
+                const colorCard = document.createElement("div");
+                colorCard.className = "color-card";
+                colorCard.innerHTML = `
+                    <div class="color-preview" style="background-color: ${formattedHex}"></div>
+                    <div class="color-info">
+                        <span class="color-hex">${formattedHex}</span>
+                    </div>
+                    <button class="delete-color-btn">
+                        <img src="img_src/x-icon.svg" alt="Удалить">
+                    </button>
+                `;
+
+                colorGallery.appendChild(colorCard);
+
+                activeBrand.sections.colors.primary.push({ hex: formattedHex });
+
+                const deleteButton = colorCard.querySelector(".delete-color-btn");
+                deleteButton.addEventListener("click", function() {
+                    colorCard.remove();
+
+                    const colorIndex = activeBrand.sections.colors.primary.findIndex(color => color.hex === formattedHex);
+                    if (colorIndex !== -1) {
+                        activeBrand.sections.colors.primary.splice(colorIndex, 1);
+                    }
+                });
+            }
+        });
+    }
+
     // Обработчик формы добавления цветов
     const addColorForm = document.getElementById("addColorForm");
     if (addColorForm) {
         addColorForm.addEventListener("submit", function(e) {
             e.preventDefault();
             
-            // Get the form input value
             const colorHexInput = document.getElementById("colorHex");
             const colorValues = colorHexInput.value.split(",").map(c => c.trim());
             
-            // Get the active brand ID
             const activeBrandId = getActiveBrandId();
             if (!activeBrandId) {
                 console.error("Не удалось определить активный бренд.");
                 alert("Ошибка: Сначала добавьте и выберите бренд.");
                 return;
             }
-            
-            // Find the active brand
-            const activeBrand = brands.find(brand => brand.id === activeBrandId);
-            if (!activeBrand) {
-                console.error("Активный бренд не найден.");
-                return;
-            }
-            
-            // Make sure the brand has a colors section
-            if (!activeBrand.sections.colors) {
-                activeBrand.sections.colors = { primary: [] };
-            } else if (!activeBrand.sections.colors.primary) {
-                activeBrand.sections.colors.primary = [];
-            }
-            
-            // Find the color gallery for the active brand
-            const mainColorsBlock = document.querySelector(`#brandsList .brand-item[data-id="${activeBrandId}"] #mainColorsBlock`);
-            const colorGallery = mainColorsBlock ? mainColorsBlock.querySelector("#mainColorsGallery") : null;
-            
-            if (!colorGallery) {
-                console.error("Галерея цветов не найдена для бренда:", activeBrandId);
-                return;
-            }
-            
-            // Display the colors block if it's hidden
-            mainColorsBlock.style.display = "block";
-            
-            // Add each color to the gallery
-            colorValues.forEach(colorHex => {
-                if (colorHex) {
-                    const formattedHex = colorHex.startsWith("#") ? colorHex : `#${colorHex}`;
-                    
-                    // Create the color card
-                    const colorCard = document.createElement("div");
-                    colorCard.className = "color-card";
-                    colorCard.innerHTML = `
-                        <div class="color-preview" style="background-color: ${formattedHex}"></div>
-                        <div class="color-info">
-                            <span class="color-hex">${formattedHex}</span>
-                        </div>
-                        <button class="delete-color-btn">
-                            <img src="img_src/trash-icon.svg" alt="Удалить" class="delete-icon">
-                        </button>
-                    `;
-                    
-                    // Add the color card to the gallery
-                    colorGallery.appendChild(colorCard);
-                    
-                    // Add the color to the brand data
-                    activeBrand.sections.colors.primary.push({ hex: formattedHex });
-                    
-                    // Add event listener to delete button
-                    const deleteButton = colorCard.querySelector(".delete-color-btn");
-                    deleteButton.addEventListener("click", function() {
-                        colorCard.remove();
-                        
-                        // Remove the color from the brand data
-                        const colorIndex = activeBrand.sections.colors.primary.findIndex(color => color.hex === formattedHex);
-                        if (colorIndex !== -1) {
-                            activeBrand.sections.colors.primary.splice(colorIndex, 1);
-                        }
-                    });
-                }
-            });
-            
-            // Reset the form
+
+            addColorsToActiveBrand(colorValues, activeBrandId);
+
             addColorForm.reset();
-            
-            // Close the modal
+
             const addColorModal = bootstrap.Modal.getInstance(document.getElementById("addColorModal"));
             if (addColorModal) {
                 addColorModal.hide();

@@ -134,6 +134,19 @@ function createLogoCard(logoData) {
             <p><strong>Половина ширины иконки:</strong> ${logoData.properties.iconWidth}</p>
             <p><strong>Охранное поле:</strong> ${logoData.properties.safeZone}</p>
         </div>
+        <button class="delete-logo-btn">
+            <img src="img_src/trash-icon.svg" alt="Удалить" class="delete-icon">
+        </button>
     `;
+    
+    // Добавляем обработчик для удаления логотипа
+    const deleteButton = logoCard.querySelector(".delete-logo-btn");
+    if (deleteButton) {
+        deleteButton.addEventListener("click", () => {
+            logoCard.remove();
+            // Если нужно также удалить логотип из данных бренда, добавляем соответствующую логику здесь
+        });
+    }
+    
     return logoCard;
 }

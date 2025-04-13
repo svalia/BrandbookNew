@@ -193,7 +193,7 @@ function addColorsToActiveBrand(colorValues, brandId) {
                     <span class="color-hex">${formattedHex}</span>
                 </div>
                 <button class="delete-color-btn">
-                    <img src="img_src/trash-icon.svg" alt="Удалить" class="delete-icon">
+                    <img src="img_src/x-icon.svg" alt="Удалить" class="delete-icon">
                 </button>
             `;
             
