@@ -145,16 +145,22 @@ document.addEventListener("DOMContentLoaded", () => {
         return sections.map(section => `
             <li class="list-group-item section-item">
                 <div class="section-header">
-                    <span>${section}</span>
-                    <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                    <div class="section-title">
+                        <span>${section}</span>
+                        <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                    </div>
                 </div>
                 <div class="section-content" style="display: none;">
                     <div class="description-block">
                         <div class="description-content"></div>
-                        <button class="add-description-btn">
-                            <span>Добавить описание</span>
-                        </button>
+                        <button class="add-description-btn btn btn-primary">Добавить описание</button>
                     </div>
+                    ${section === "Логотипы" ? `
+                        <button class="btn btn-success mt-3 add-logo-btn" data-bs-toggle="modal" data-bs-target="#addLogoModal">Добавить логотип</button>
+                        <div class="logos-gallery mt-4">
+                            <!-- Галерея логотипов будет динамически добавляться -->
+                        </div>
+                    ` : ""}
                 </div>
             </li>
         `).join('');
@@ -272,4 +278,82 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.removeChild(editorModal);
         });
     }
+
+    const addLogoForm = document.getElementById("addLogoForm");
+
+    // Обработчик изменения цвета
+    const logoColorSelect = document.getElementById("logoColor");
+    const customColorField = document.getElementById("customColorField");
+    logoColorSelect.addEventListener("change", () => {
+        customColorField.style.display = logoColorSelect.value === "custom" ? "block" : "none";
+    });
+
+    // Обработчик формы добавления логотипа
+    addLogoForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const logoFile = document.getElementById("logoFile").files[0];
+        const logoColor = document.getElementById("logoColor").value;
+        const customColor = document.getElementById("customColor").value;
+        const logoLanguage = document.getElementById("logoLanguage").value;
+        const logoType = document.getElementById("logoType").value;
+        const logoOrientation = document.getElementById("logoOrientation").value;
+        const iconWidth = document.getElementById("iconWidth").value;
+        const safeZone = document.getElementById("safeZone").value;
+
+        if (!logoFile) {
+            alert("Выберите файл логотипа.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const logoData = {
+                id: Date.now(),
+                name: logoFile.name,
+                image: reader.result,
+                properties: {
+                    color: logoColor === "custom" ? customColor : logoColor,
+                    language: logoLanguage,
+                    type: logoType,
+                    orientation: logoOrientation,
+                    iconWidth: `${iconWidth}%`,
+                    safeZone: `${safeZone}%`
+                }
+            };
+
+            // Находим галерею логотипов в текущей секции
+            const logosGallery = document.querySelector(".logos-gallery");
+            if (!logosGallery) {
+                console.error("Галерея логотипов не найдена.");
+                return;
+            }
+
+            // Добавляем логотип в галерею
+            const logoCard = document.createElement("div");
+            logoCard.className = "logo-card";
+            logoCard.innerHTML = `
+                <img src="${logoData.image}" alt="${logoData.name}" class="logo-preview">
+                <div class="logo-details">
+                    <p><strong>Название:</strong> ${logoData.name}</p>
+                    <p><strong>Цвет:</strong> ${logoData.properties.color}</p>
+                    <p><strong>Язык:</strong> ${logoData.properties.language}</p>
+                    <p><strong>Тип:</strong> ${logoData.properties.type}</p>
+                    <p><strong>Ориентация:</strong> ${logoData.properties.orientation}</p>
+                    <p><strong>Ширина иконки:</strong> ${logoData.properties.iconWidth}</p>
+                    <p><strong>Охранное поле:</strong> ${logoData.properties.safeZone}</p>
+                </div>
+            `;
+            logosGallery.appendChild(logoCard);
+
+            // Сбрасываем форму
+            addLogoForm.reset();
+            document.getElementById("customColorField").style.display = "none";
+
+            // Закрываем модальное окно
+            const addLogoModal = bootstrap.Modal.getInstance(document.getElementById("addLogoModal"));
+            addLogoModal.hide();
+        };
+        reader.readAsDataURL(logoFile);
+    });
 });

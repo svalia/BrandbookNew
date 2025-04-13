@@ -41,6 +41,73 @@
             </div>
         </div>
     </div>
+
+    <!-- Модальное окно для добавления логотипа -->
+    <div class="modal fade" id="addLogoModal" tabindex="-1" aria-labelledby="addLogoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLogoModalLabel">Добавить логотип</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addLogoForm">
+                        <div class="mb-3">
+                            <label for="logoFile" class="form-label">Файл логотипа</label>
+                            <input type="file" class="form-control" id="logoFile" accept=".png,.svg" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="logoColor" class="form-label">Цвет</label>
+                            <select class="form-select" id="logoColor" required>
+                                <option value="white">Белый</option>
+                                <option value="black">Чёрный</option>
+                                <option value="multicolor">Цветной</option>
+                                <option value="custom">Пользовательский</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="customColorField" style="display: none;">
+                            <label for="customColor" class="form-label">Пользовательский цвет</label>
+                            <input type="text" class="form-control" id="customColor" placeholder="Введите название цвета">
+                        </div>
+                        <div class="mb-3">
+                            <label for="logoLanguage" class="form-label">Язык</label>
+                            <select class="form-select" id="logoLanguage" required>
+                                <option value="rus">Русский</option>
+                                <option value="eng">Английский</option>
+                                <option value="multi">Общий</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="logoType" class="form-label">Тип</label>
+                            <select class="form-select" id="logoType" required>
+                                <option value="main">Основной</option>
+                                <option value="simple">Упрощённый</option>
+                                <option value="sign">Знак</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="logoOrientation" class="form-label">Ориентация</label>
+                            <select class="form-select" id="logoOrientation" required>
+                                <option value="horizontal">Горизонтальный</option>
+                                <option value="vertical">Вертикальный</option>
+                                <option value="square">Квадратный</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="iconWidth" class="form-label">Половина ширины иконки (%)</label>
+                            <input type="number" class="form-control" id="iconWidth" min="0" max="100" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="safeZone" class="form-label">Охранное поле (%)</label>
+                            <input type="number" class="form-control" id="safeZone" min="0" max="100" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>    
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
