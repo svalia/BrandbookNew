@@ -79,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const brandItem = document.createElement("div");
             brandItem.className = "brand-item";
+            brandItem.dataset.id = brand.id; // Добавляем data-id для определения активного бренда
             brandItem.innerHTML = `
                 <div class="toggle-section" data-id="${brand.id}">
                     <div class="brand-name-container">
@@ -161,6 +162,107 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 console.warn("Кнопки 'Добавить описание' не найдены");
             }
+
+            // Добавляем обработчики для кнопок управления цветами - здесь добавляем обработчики сразу после создания
+            const addColorButtons = brandItem.querySelectorAll("#addColor");
+            const addPairedColorsButtons = brandItem.querySelectorAll("#addPairedColors");
+            const addPaletteButtons = brandItem.querySelectorAll("#addPalette");
+
+            const mainColorsBlocks = brandItem.querySelectorAll("#mainColorsBlock");
+            const pairedColorsBlocks = brandItem.querySelectorAll("#pairedColorsBlock");
+            const palettesBlocks = brandItem.querySelectorAll("#palettesBlock");
+
+            if (addColorButtons && addColorButtons.length > 0) {
+                addColorButtons.forEach((button, index) => {
+                    button.addEventListener("click", function() {
+                        if (mainColorsBlocks[index]) {
+                            mainColorsBlocks[index].style.display = "block";
+                        }
+                        // Открыть модальное окно для добавления цвета
+                        const addColorModal = new bootstrap.Modal(document.getElementById('addColorModal'));
+                        addColorModal.show();
+                    });
+                });
+            }
+
+            if (addPairedColorsButtons && addPairedColorsButtons.length > 0) {
+                addPairedColorsButtons.forEach((button, index) => {
+                    button.addEventListener("click", function() {
+                        if (pairedColorsBlocks[index]) {
+                            pairedColorsBlocks[index].style.display = "block";
+                        }
+                    });
+                });
+            }
+
+            if (addPaletteButtons && addPaletteButtons.length > 0) {
+                addPaletteButtons.forEach((button, index) => {
+                    button.addEventListener("click", function() {
+                        if (palettesBlocks[index]) {
+                            palettesBlocks[index].style.display = "block";
+                        }
+                    });
+                });
+            }
+
+            const addPairedColorsButton = brandItem.querySelector("#addPairedColors");
+            const addPairedColorsModal = document.getElementById("addPairedColorsModal");
+
+            if (addPairedColorsButton && addPairedColorsModal) {
+                addPairedColorsButton.addEventListener("click", () => {
+                    console.log("Кнопка 'Добавить парные цвета' нажата."); // Отладочное сообщение
+
+                    // Получаем список цветов из блока "Основные и дополнительные цвета"
+                    const mainColorsGallery = brandItem.querySelector("#mainColorsGallery");
+                    const backgroundColorSelect = document.getElementById("backgroundColor");
+                    const textColorSelect = document.getElementById("textColor");
+
+                    if (mainColorsGallery && backgroundColorSelect && textColorSelect) {
+                        // Очищаем селекты перед заполнением
+                        backgroundColorSelect.innerHTML = "";
+                        textColorSelect.innerHTML = "";
+
+                        // Заполняем селекты цветами из галереи
+                        const colorCards = mainColorsGallery.querySelectorAll(".color-card");
+                        if (colorCards.length > 0) {
+                            colorCards.forEach((card) => {
+                                const colorHex = card.querySelector(".color-hex").textContent.trim();
+                                
+                                // Создаем опции с текстом цвета
+                                const bgOption = document.createElement("option");
+                                bgOption.value = colorHex;
+                                bgOption.textContent = colorHex;
+                                backgroundColorSelect.appendChild(bgOption);
+                                
+                                const textOption = document.createElement("option");
+                                textOption.value = colorHex;
+                                textOption.textContent = colorHex;
+                                textColorSelect.appendChild(textOption);
+                            });
+                        } else {
+                            console.warn("В галерее не найдены цвета. Добавьте сначала основные цвета.");
+                            const option = document.createElement("option");
+                            option.textContent = "Нет доступных цветов";
+                            option.disabled = true;
+                            backgroundColorSelect.appendChild(option.cloneNode(true));
+                            textColorSelect.appendChild(option);
+                        }
+                    } else {
+                        console.warn("Не удалось найти галерею цветов или селекты для модального окна.");
+                    }
+
+                    // Открываем модальное окно
+                    try {
+                        const modalInstance = new bootstrap.Modal(addPairedColorsModal);
+                        modalInstance.show();
+                        console.log("Модальное окно 'addPairedColorsModal' отображено."); // Отладочное сообщение
+                    } catch (error) {
+                        console.error("Ошибка при попытке отобразить модальное окно:", error);
+                    }
+                });
+            } else {
+                console.error("Кнопка 'Добавить парные цвета' или модальное окно 'addPairedColorsModal' не найдены.");
+            }
         });
     }
 
@@ -225,246 +327,218 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join('');
     }
 
-    // Корректировка обработки кнопок управления цветами
-    setTimeout(() => {
-        const addColorButton = document.getElementById("addColor");
-        const addPairedColorsButton = document.getElementById("addPairedColors");
-        const addPaletteButton = document.getElementById("addPalette");
-        
-        const mainColorsBlock = document.getElementById("mainColorsBlock");
-        const pairedColorsBlock = document.getElementById("pairedColorsBlock");
-        const palettesBlock = document.getElementById("palettesBlock");
-        
-        if (addColorButton && mainColorsBlock) {
-            addColorButton.addEventListener("click", function() {
-                mainColorsBlock.style.display = "block";
-            });
-        }
-        
-        if (addPairedColorsButton && pairedColorsBlock) {
-            addPairedColorsButton.addEventListener("click", function() {
-                pairedColorsBlock.style.display = "block";
-            });
-        }
-        
-        if (addPaletteButton && palettesBlock) {
-            addPaletteButton.addEventListener("click", function() {
-                palettesBlock.style.display = "block";
-            });
-        }
-    }, 1000); // Небольшая задержка для гарантии загрузки DOM
+    const pairedColorsGallery = document.querySelector(".paired-colors-gallery");
+    const addPairedColorsForm = document.getElementById("addPairedColorsForm");
 
-    function openEditor(targetElement, existingContent = "") {
-        const editorModal = document.createElement("div");
-        editorModal.className = "editor-modal";
-        editorModal.innerHTML = `
-            <div class="editor-container">
-                <div class="editor-toolbar">
-                    <button data-action="h1">H1</button>
-                    <button data-action="h2">H2</button>
-                    <button data-action="h3">H3</button>
-                    <button data-action="h4">H4</button>
-                    <button data-action="bold">B</button>
-                    <button data-action="italic">I</button>
-                    <button data-action="ul">•</button>
-                    <button data-action="ol">1.</button>
-                </div>
-                <div class="editor-content">
-                    <textarea id="wysiwyg-editor" maxlength="10000" placeholder="Добавьте описание">${existingContent}</textarea>
-                </div>
-                <div class="editor-actions">
-                    <button class="btn-cancel">Отмена</button>
-                    <button class="btn-save">Сохранить</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(editorModal);
+    if (addPairedColorsForm) {
+        addPairedColorsForm.addEventListener("submit", (e) => {
+            e.preventDefault();
 
-        const textarea = editorModal.querySelector("#wysiwyg-editor");
-        const toolbar = editorModal.querySelector(".editor-toolbar");
+            const backgroundColor = document.getElementById("backgroundColor").value;
+            const textColor = document.getElementById("textColor").value;
+            const allowInversion = document.getElementById("allowInversion").checked;
 
-        // Обработчики кнопок форматирования
-        toolbar.addEventListener("click", (e) => {
-            const action = e.target.dataset.action;
-            if (!action) return;
-
-            const actions = {
-                h1: '# ',
-                h2: '## ',
-                h3: '### ',
-                h4: '#### ',
-                bold: '**',
-                italic: '_',
-                ul: '- ',
-                ol: '1. '
-            };
-
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const selected = textarea.value.substring(start, end);
-            
-            switch(action) {
-                case 'bold':
-                case 'italic':
-                    textarea.value = textarea.value.substring(0, start) + 
-                                   actions[action] + selected + actions[action] +
-                                   textarea.value.substring(end);
-                    break;
-                case 'ul':
-                case 'ol':
-                case 'h1':
-                case 'h2':
-                case 'h3':
-                case 'h4':
-                    textarea.value = textarea.value.substring(0, start) +
-                                   actions[action] + selected +
-                                   textarea.value.substring(end);
-                    break;
-            }
-        });
-
-        // Обработчики кнопок "Сохранить" и "Отмена"
-        const saveButton = editorModal.querySelector(".btn-save");
-        const cancelButton = editorModal.querySelector(".btn-cancel");
-
-        saveButton.addEventListener("click", () => {
-            const content = textarea.value; // Получаем текст из редактора
-            console.log("Сохраняем текст:", content); // Отладочное сообщение
-
-            if (typeof marked.parse === "function") {
-                // Используем marked.parse для преобразования Markdown в HTML
-                targetElement.innerHTML = `
-                    <div class="formatted-description">${marked.parse(content)}</div>
-                    <button class="btn btn-secondary edit-description-btn">Редактировать</button>
-                `;
-                console.log("Текст успешно преобразован с помощью marked.parse");
-            } else {
-                console.error("Библиотека marked.js не поддерживает parse");
-                targetElement.innerHTML = `
-                    <div class="formatted-description" style="white-space: pre-wrap;">${content}</div>
-                    <button class="btn btn-secondary edit-description-btn">Редактировать</button>
-                `;
-            }
-
-            // Удаляем модальное окно
-            document.body.removeChild(editorModal);
-
-            // Удаляем кнопку "Добавить описание", если она есть
-            const addDescriptionButton = targetElement.closest(".description-block").querySelector(".add-description-btn");
-            if (addDescriptionButton) {
-                addDescriptionButton.remove();
-            }
-
-            // Добавляем обработчик для кнопки "Редактировать"
-            const editButton = targetElement.querySelector(".edit-description-btn");
-            editButton.addEventListener("click", () => {
-                openEditor(targetElement, content); // Передаём существующий текст для редактирования
-            });
-        });
-
-        cancelButton.addEventListener("click", () => {
-            document.body.removeChild(editorModal);
-        });
-    }
-
-    const addLogoForm = document.getElementById("addLogoForm");
-
-    // Обработчик изменения цвета
-    const logoColorSelect = document.getElementById("logoColor");
-    const customColorField = document.getElementById("customColorField");
-    logoColorSelect.addEventListener("change", () => {
-        customColorField.style.display = logoColorSelect.value === "custom" ? "block" : "none";
-    });
-
-    const logoWidthInput = document.getElementById("logoWidth");
-    const logoHeightInput = document.getElementById("logoHeight");
-    const iconWidthPxInput = document.getElementById("iconWidthPx");
-    const letterBHeightInput = document.getElementById("letterBHeight");
-    const calculatedIconWidthElement = document.getElementById("calculatedIconWidth");
-    const calculatedSafeZoneElement = document.getElementById("calculatedSafeZone");
-
-    // Функция для нормализации дробных чисел
-    function normalizeNumber(value) {
-        return parseFloat(value.replace(",", ".").replace(/[^0-9.]/g, "")) || 0;
-    }
-
-    // Функция для расчёта значений
-    function calculateValues() {
-        const logoWidth = normalizeNumber(logoWidthInput.value);
-        const logoHeight = normalizeNumber(logoHeightInput.value);
-        const iconWidthPx = normalizeNumber(iconWidthPxInput.value);
-        const letterBHeight = normalizeNumber(letterBHeightInput.value);
-
-        // Расчёт половины ширины иконки
-        const iconWidthPercent = logoWidth > 0 ? ((iconWidthPx / logoWidth) * 100) / 2 : 0;
-
-        // Расчёт охранного поля
-        const safeZonePercent = logoHeight > 0 ? (letterBHeight / logoHeight) * 100 : 0;
-
-        // Обновляем значения в текстовых элементах
-        calculatedIconWidthElement.textContent = iconWidthPercent.toFixed(3);
-        calculatedSafeZoneElement.textContent = safeZonePercent.toFixed(3);
-    }
-
-    // Добавляем обработчики для ввода данных
-    [logoWidthInput, logoHeightInput, iconWidthPxInput, letterBHeightInput].forEach((input) => {
-        input.addEventListener("input", () => {
-            input.value = input.value.replace(",", "."); // Заменяем запятые на точки
-            calculateValues(); // Пересчитываем значения
-        });
-    });
-
-    // Обработчик формы добавления логотипа
-    addLogoForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const logoFile = document.getElementById("logoFile").files[0];
-        const logoWidth = parseFloat(calculatedIconWidthElement.textContent);
-        const safeZone = parseFloat(calculatedSafeZoneElement.textContent);
-
-        if (!logoFile) {
-            alert("Выберите файл логотипа.");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            const logoData = {
-                id: Date.now(),
-                name: logoFile.name,
-                image: reader.result,
-                properties: {
-                    iconWidth: `${logoWidth}%`,
-                    safeZone: `${safeZone}%`,
-                }
-            };
-
-            // Добавляем логотип в галерею
-            const logosGallery = document.querySelector(".logos-gallery");
-            if (!logosGallery) {
-                console.error("Галерея логотипов не найдена.");
+            // Получаем ID активного бренда
+            const activeBrandId = getActiveBrandId();
+            if (!activeBrandId) {
+                console.error("Не удалось определить активный бренд.");
+                alert("Ошибка: Не удалось определить активный бренд.");
                 return;
             }
 
-            const logoCard = document.createElement("div");
-            logoCard.className = "logo-card";
-            logoCard.innerHTML = `
-                <img src="${logoData.image}" alt="${logoData.name}" class="logo-preview">
-                <div class="logo-details">
-                    <p><strong>Название:</strong> ${logoData.name}</p>
-                    <p><strong>Половина ширины иконки:</strong> ${logoData.properties.iconWidth}</p>
-                    <p><strong>Охранное поле:</strong> ${logoData.properties.safeZone}</p>
-                </div>
-            `;
-            logosGallery.appendChild(logoCard);
+            // Находим галерею парных цветов для активного бренда
+            const pairedColorsGallery = document.querySelector(`#brandsList [data-id="${activeBrandId}"] #pairedColorsGallery`);
+            if (!pairedColorsGallery) {
+                console.error("Галерея парных цветов не найдена для бренда:", activeBrandId);
+                return;
+            }
 
-            // Сбрасываем форму
-            addLogoForm.reset();
+            // Создаем карточку парных цветов
+            const pairedColorCard = document.createElement("div");
+            pairedColorCard.className = "paired-color-card";
+            pairedColorCard.innerHTML = `
+                <div class="paired-color-header">
+                    <div class="paired-color-item">
+                        <div>Цвет фона</div>
+                        <div class="paired-color-preview" style="background: ${backgroundColor}"></div>
+                        <div>${backgroundColor}</div>
+                    </div>
+                    <div class="paired-color-item">
+                        <div>Цвет текста</div>
+                        <div class="paired-color-preview" style="background: ${textColor}"></div>
+                        <div>${textColor}</div>
+                    </div>
+                </div>
+                <div class="paired-color-sample" style="background-color: ${backgroundColor}; color: ${textColor}">Sample text</div>
+                <div class="paired-color-inversion">${allowInversion ? "✅ инверсия допустима" : "❌ инверсия недопустима"}</div>
+                ${allowInversion ? `
+                <div class="paired-color-inverted">
+                    <div class="paired-color-header">
+                        <div class="paired-color-item">
+                            <div>Цвет фона</div>
+                            <div class="paired-color-preview" style="background: ${textColor}"></div>
+                            <div>${textColor}</div>
+                        </div>
+                        <div class="paired-color-item">
+                            <div>Цвет текста</div>
+                            <div class="paired-color-preview" style="background: ${backgroundColor}"></div>
+                            <div>${backgroundColor}</div>
+                        </div>
+                    </div>
+                    <div class="paired-color-sample" style="background-color: ${textColor}; color: ${backgroundColor}">Sample text</div>
+                </div>
+                ` : ''}
+                <button class="paired-color-delete">Удалить</button>
+            `;
+
+            // Добавляем обработчик для удаления карточки
+            pairedColorCard.querySelector(".paired-color-delete").addEventListener("click", () => {
+                pairedColorCard.remove();
+            });
+
+            // Добавляем карточку в галерею
+            pairedColorsGallery.appendChild(pairedColorCard);
+
+            // Сохраняем парный цвет в данных бренда
+            const activeBrand = brands.find(brand => brand.id === activeBrandId);
+            if (activeBrand) {
+                if (!activeBrand.sections.colors) {
+                    activeBrand.sections.colors = {};
+                }
+                if (!activeBrand.sections.colors.paired) {
+                    activeBrand.sections.colors.paired = [];
+                }
+                activeBrand.sections.colors.paired.push({
+                    backgroundColor,
+                    textColor,
+                    allowInversion
+                });
+            }
 
             // Закрываем модальное окно
-            const addLogoModal = bootstrap.Modal.getInstance(document.getElementById("addLogoModal"));
-            addLogoModal.hide();
-        };
-        reader.readAsDataURL(logoFile);
-    });
+            const addPairedColorsModal = bootstrap.Modal.getInstance(document.getElementById("addPairedColorsModal"));
+            if (addPairedColorsModal) {
+                addPairedColorsModal.hide();
+            } else {
+                console.error("Не удалось найти экземпляр модального окна для парных цветов");
+            }
+        });
+    }
+
+    // Функция для получения ID активного бренда
+    function getActiveBrandId() {
+        const activeBrandElement = document.querySelector(".brand-item .brand-sections-content[style*='display: block']");
+        if (activeBrandElement) {
+            const brandItem = activeBrandElement.closest(".brand-item");
+            if (brandItem && brandItem.dataset && brandItem.dataset.id) {
+                return parseInt(brandItem.dataset.id, 10);
+            }
+        }
+        
+        // Если активный бренд не найден через открытую секцию, берем первый бренд из списка
+        const firstBrand = document.querySelector(".brand-item");
+        if (firstBrand && firstBrand.dataset && firstBrand.dataset.id) {
+            return parseInt(firstBrand.dataset.id, 10);
+        }
+        
+        // Если все еще не нашли, используем первый бренд из массива данных
+        if (brands.length > 0) {
+            return brands[0].id;
+        }
+        
+        return null;
+    }
+
+    // Обработчик формы добавления цветов
+    const addColorForm = document.getElementById("addColorForm");
+    if (addColorForm) {
+        addColorForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            // Get the form input value
+            const colorHexInput = document.getElementById("colorHex");
+            const colorValues = colorHexInput.value.split(",").map(c => c.trim());
+            
+            // Get the active brand ID
+            const activeBrandId = getActiveBrandId();
+            if (!activeBrandId) {
+                console.error("Не удалось определить активный бренд.");
+                alert("Ошибка: Сначала добавьте и выберите бренд.");
+                return;
+            }
+            
+            // Find the active brand
+            const activeBrand = brands.find(brand => brand.id === activeBrandId);
+            if (!activeBrand) {
+                console.error("Активный бренд не найден.");
+                return;
+            }
+            
+            // Make sure the brand has a colors section
+            if (!activeBrand.sections.colors) {
+                activeBrand.sections.colors = { primary: [] };
+            } else if (!activeBrand.sections.colors.primary) {
+                activeBrand.sections.colors.primary = [];
+            }
+            
+            // Find the color gallery for the active brand
+            const mainColorsBlock = document.querySelector(`#brandsList .brand-item[data-id="${activeBrandId}"] #mainColorsBlock`);
+            const colorGallery = mainColorsBlock ? mainColorsBlock.querySelector("#mainColorsGallery") : null;
+            
+            if (!colorGallery) {
+                console.error("Галерея цветов не найдена для бренда:", activeBrandId);
+                return;
+            }
+            
+            // Display the colors block if it's hidden
+            mainColorsBlock.style.display = "block";
+            
+            // Add each color to the gallery
+            colorValues.forEach(colorHex => {
+                if (colorHex) {
+                    const formattedHex = colorHex.startsWith("#") ? colorHex : `#${colorHex}`;
+                    
+                    // Create the color card
+                    const colorCard = document.createElement("div");
+                    colorCard.className = "color-card";
+                    colorCard.innerHTML = `
+                        <div class="color-preview" style="background-color: ${formattedHex}"></div>
+                        <div class="color-info">
+                            <span class="color-hex">${formattedHex}</span>
+                        </div>
+                        <button class="delete-color-btn">
+                            <img src="img_src/trash-icon.svg" alt="Удалить" class="delete-icon">
+                        </button>
+                    `;
+                    
+                    // Add the color card to the gallery
+                    colorGallery.appendChild(colorCard);
+                    
+                    // Add the color to the brand data
+                    activeBrand.sections.colors.primary.push({ hex: formattedHex });
+                    
+                    // Add event listener to delete button
+                    const deleteButton = colorCard.querySelector(".delete-color-btn");
+                    deleteButton.addEventListener("click", function() {
+                        colorCard.remove();
+                        
+                        // Remove the color from the brand data
+                        const colorIndex = activeBrand.sections.colors.primary.findIndex(color => color.hex === formattedHex);
+                        if (colorIndex !== -1) {
+                            activeBrand.sections.colors.primary.splice(colorIndex, 1);
+                        }
+                    });
+                }
+            });
+            
+            // Reset the form
+            addColorForm.reset();
+            
+            // Close the modal
+            const addColorModal = bootstrap.Modal.getInstance(document.getElementById("addColorModal"));
+            if (addColorModal) {
+                addColorModal.hide();
+            }
+        });
+    }
 });
