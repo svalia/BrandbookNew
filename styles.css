@@ -716,6 +716,91 @@ h1 {
     border: none;
 }
 
+/* Стили для кастомных селектов с превью цветов */
+.custom-color-select {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.custom-color-select .select-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background-color: white;
+    cursor: pointer;
+    user-select: none;
+}
+
+.custom-color-select .select-header:after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #666;
+    margin-left: auto;
+}
+
+.custom-color-select .select-header:hover {
+    border-color: #adb5bd;
+}
+
+.custom-color-select .select-header.active:after {
+    border-top: 0;
+    border-bottom: 5px solid #666;
+}
+
+.custom-color-select .select-color-preview {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.19);
+}
+
+.custom-color-select .select-color-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: black;
+}
+
+.custom-color-select .select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin-top: 5px;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.custom-color-select .select-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.custom-color-select .select-option:hover {
+    background-color: #f8f9fa;
+}
+
+.custom-color-select .select-option.selected {
+    background-color: #e9ecef;
+}
+
 /* Стили для селектов с превью цвета */
 .select-with-color {
     position: relative;
@@ -755,4 +840,88 @@ h1 {
     background-color: var(--color);
     border: 1px solid rgba(0, 0, 0, 0.1);
     z-index: 1;
+}
+
+/* Стили для карточек цветов в модальном окне "Парные цвета" */
+.colors-container {
+    margin-bottom: 20px;
+}
+
+.colors-container h6 {
+    margin-bottom: 12px;
+}
+
+.colors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-gap: 10px;
+    margin-bottom: 20px;
+}
+
+.color-option-card {
+    padding: 8px;
+    background: white;
+    border-radius: 8px;
+    outline: 1px #E4E4E4 solid;
+    outline-offset: -1px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.color-option-card:hover {
+    background-color: #F8F9FA;
+    outline-color: #1D953C;
+    outline-width: 2px;
+}
+
+.color-option-card.selected {
+    background-color: #F1FFF5;
+    outline-color: #1D953C;
+    outline-width: 2px;
+}
+
+.color-option-preview {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.19);
+}
+
+.color-option-value {
+    text-align: center;
+    color: black;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+}
+
+/* Улучшенный стиль для чекбокса */
+.inversion-checkbox {
+    margin-top: 10px;
+    padding: 12px 15px;
+    background: #F8F9FA;
+    border-radius: 8px;
+    border: 1px solid #E4E4E4;
+}
+
+.inversion-checkbox .form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.inversion-checkbox .form-check-input:checked {
+    background-color: #1D953C;
+    border-color: #1D953C;
+}
+
+.inversion-checkbox .form-check-label {
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
 }

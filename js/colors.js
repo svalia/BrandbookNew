@@ -328,3 +328,230 @@ function addPairedColorsToActiveBrand(backgroundColor, textColor, allowInversion
         addPairedColorsModal.hide();
     }
 }
+
+// Инициализация модального окна добавления парных цветов
+function initPairedColorsModal() {
+    // Находим модальное окно
+    const modal = document.getElementById('addPairedColorsModal');
+    
+    if (!modal) {
+        console.error('Модальное окно "addPairedColorsModal" не найдено');
+        return;
+    }
+    
+    // Добавляем обработчик события показа модального окна
+    modal.addEventListener('show.bs.modal', function (event) {
+        console.log('Обработчик show.bs.modal вызван');
+        
+        // Получаем кнопку, которая вызвала модальное окно
+        const button = event.relatedTarget;
+        if (!button) {
+            console.error('event.relatedTarget не определен');
+            return;
+        }
+        
+        // Получаем родительский элемент бренда
+        const brandItem = button.closest('.brand-item');
+        if (!brandItem) {
+            console.error('Не найден родительский элемент .brand-item');
+            return;
+        }
+        
+        // Находим галерею цветов
+        const mainColorsGallery = brandItem.querySelector('#mainColorsGallery');
+        const backgroundColorGrid = document.getElementById('backgroundColorGrid');
+        const textColorGrid = document.getElementById('textColorGrid');
+        
+        if (!mainColorsGallery) {
+            console.error('Не найдена галерея цветов #mainColorsGallery');
+            return;
+        }
+        
+        if (!backgroundColorGrid || !textColorGrid) {
+            console.error('Не найдены контейнеры для отображения цветов');
+            return;
+        }
+        
+        // Очищаем контейнеры перед заполнением
+        backgroundColorGrid.innerHTML = '';
+        textColorGrid.innerHTML = '';
+        
+        // Сбрасываем значения скрытых полей
+        document.getElementById('selectedBackgroundColor').value = '';
+        document.getElementById('selectedTextColor').value = '';
+        
+        // Получаем цвета
+        const colorCards = mainColorsGallery.querySelectorAll('.color-card');
+        console.log(`Найдено ${colorCards.length} цветов для добавления в модальное окно`);
+        
+        if (colorCards.length > 0) {
+            // Добавляем цвета в сетку
+            colorCards.forEach(card => {
+                const colorHex = card.querySelector('.color-hex').textContent.trim();
+                const colorPreviewStyle = card.querySelector('.color-preview').style.backgroundColor;
+                
+                // Создаем карточку для выбора фона
+                const bgColorCard = document.createElement('div');
+                bgColorCard.className = 'color-option-card';
+                bgColorCard.dataset.color = colorHex;
+                bgColorCard.innerHTML = `
+                    <div class="color-option-preview" style="background-color: ${colorPreviewStyle}"></div>
+                    <div class="color-option-value">${colorHex}</div>
+                `;
+                
+                // Создаем карточку для выбора текста
+                const textColorCard = bgColorCard.cloneNode(true);
+                
+                // Добавляем обработчики событий
+                bgColorCard.addEventListener('click', () => {
+                    backgroundColorGrid.querySelectorAll('.color-option-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    bgColorCard.classList.add('selected');
+                    document.getElementById('selectedBackgroundColor').value = colorHex;
+                });
+                
+                textColorCard.addEventListener('click', () => {
+                    textColorGrid.querySelectorAll('.color-option-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    textColorCard.classList.add('selected');
+                    document.getElementById('selectedTextColor').value = colorHex;
+                });
+                
+                // Добавляем карточки
+                backgroundColorGrid.appendChild(bgColorCard);
+                textColorGrid.appendChild(textColorCard);
+            });
+            
+            // Выбираем первые карточки по умолчанию
+            if (backgroundColorGrid.firstChild) backgroundColorGrid.firstChild.click();
+            if (textColorGrid.firstChild) textColorGrid.firstChild.click();
+        } else {
+            // Если цветов нет, показываем предупреждение
+            const warning = document.createElement('div');
+            warning.className = 'alert alert-warning';
+            warning.textContent = 'Нет доступных цветов. Пожалуйста, сначала добавьте основные цвета.';
+            
+            backgroundColorGrid.appendChild(warning.cloneNode(true));
+            textColorGrid.appendChild(warning);
+        }
+    });
+}
+
+// Добавляем обработчик на модальное окно для добавления парных цветов напрямую через метод
+function setupPairedColorsButton() {
+    const allPairedColorsButtons = document.querySelectorAll('#addPairedColors');
+    allPairedColorsButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const brandItem = this.closest('.brand-item');
+            if (!brandItem) {
+                console.error('Не найден родительский элемент .brand-item');
+                return;
+            }
+            
+            // Находим галерею цветов
+            const mainColorsGallery = brandItem.querySelector('#mainColorsGallery');
+            const pairedColorsBlocks = brandItem.querySelectorAll('#pairedColorsBlock');
+            
+            // Отображаем блок парных цветов
+            pairedColorsBlocks.forEach(block => {
+                block.style.display = "block";
+            });
+            
+            // Подготавливаем данные и открываем модальное окно вручную
+            showPairedColorsModal(mainColorsGallery);
+        });
+    });
+}
+
+// Функция для показа модального окна с подготовкой данных
+function showPairedColorsModal(mainColorsGallery) {
+    const modal = document.getElementById('addPairedColorsModal');
+    const backgroundColorGrid = document.getElementById('backgroundColorGrid');
+    const textColorGrid = document.getElementById('textColorGrid');
+    
+    if (!mainColorsGallery || !backgroundColorGrid || !textColorGrid || !modal) {
+        console.error('Не найдены необходимые элементы для отображения парных цветов');
+        return;
+    }
+    
+    // Очищаем контейнеры перед заполнением
+    backgroundColorGrid.innerHTML = '';
+    textColorGrid.innerHTML = '';
+    
+    // Сбрасываем значения скрытых полей
+    document.getElementById('selectedBackgroundColor').value = '';
+    document.getElementById('selectedTextColor').value = '';
+    
+    // Получаем цвета
+    const colorCards = mainColorsGallery.querySelectorAll('.color-card');
+    console.log(`Найдено ${colorCards.length} цветов для добавления в модальное окно`);
+    
+    if (colorCards.length > 0) {
+        // Добавляем цвета в сетку
+        colorCards.forEach(card => {
+            const colorHex = card.querySelector('.color-hex').textContent.trim();
+            const colorPreviewStyle = card.querySelector('.color-preview').style.backgroundColor;
+            
+            // Создаем карточку для выбора фона
+            const bgColorCard = document.createElement('div');
+            bgColorCard.className = 'color-option-card';
+            bgColorCard.dataset.color = colorHex;
+            bgColorCard.innerHTML = `
+                <div class="color-option-preview" style="background-color: ${colorPreviewStyle}"></div>
+                <div class="color-option-value">${colorHex}</div>
+            `;
+            
+            // Создаем карточку для выбора текста
+            const textColorCard = bgColorCard.cloneNode(true);
+            
+            // Добавляем обработчики событий
+            bgColorCard.addEventListener('click', () => {
+                backgroundColorGrid.querySelectorAll('.color-option-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                bgColorCard.classList.add('selected');
+                document.getElementById('selectedBackgroundColor').value = colorHex;
+            });
+            
+            textColorCard.addEventListener('click', () => {
+                textColorGrid.querySelectorAll('.color-option-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                textColorCard.classList.add('selected');
+                document.getElementById('selectedTextColor').value = colorHex;
+            });
+            
+            // Добавляем карточки
+            backgroundColorGrid.appendChild(bgColorCard);
+            textColorGrid.appendChild(textColorCard);
+        });
+        
+        // Выбираем первые карточки по умолчанию
+        if (backgroundColorGrid.firstChild) backgroundColorGrid.firstChild.click();
+        if (textColorGrid.firstChild) textColorGrid.firstChild.click();
+    } else {
+        // Если цветов нет, показываем предупреждение
+        const warning = document.createElement('div');
+        warning.className = 'alert alert-warning';
+        warning.textContent = 'Нет доступных цветов. Пожалуйста, сначала добавьте основные цвета.';
+        
+        backgroundColorGrid.appendChild(warning.cloneNode(true));
+        textColorGrid.appendChild(warning);
+    }
+    
+    // Открываем модальное окно
+    try {
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+    } catch (error) {
+        console.error('Ошибка при попытке отобразить модальное окно:', error);
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Инициализация colors.js');
+    setupPairedColorsButton();
+});

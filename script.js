@@ -205,64 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
 
-            const addPairedColorsButton = brandItem.querySelector("#addPairedColors");
-            const addPairedColorsModal = document.getElementById("addPairedColorsModal");
-
-            if (addPairedColorsButton && addPairedColorsModal) {
-                addPairedColorsButton.addEventListener("click", () => {
-                    console.log("Кнопка 'Добавить парные цвета' нажата."); // Отладочное сообщение
-
-                    // Получаем список цветов из блока "Основные и дополнительные цвета"
-                    const mainColorsGallery = brandItem.querySelector("#mainColorsGallery");
-                    const backgroundColorSelect = document.getElementById("backgroundColor");
-                    const textColorSelect = document.getElementById("textColor");
-
-                    if (mainColorsGallery && backgroundColorSelect && textColorSelect) {
-                        // Очищаем селекты перед заполнением
-                        backgroundColorSelect.innerHTML = "";
-                        textColorSelect.innerHTML = "";
-
-                        // Заполняем селекты цветами из галереи
-                        const colorCards = mainColorsGallery.querySelectorAll(".color-card");
-                        if (colorCards.length > 0) {
-                            colorCards.forEach((card) => {
-                                const colorHex = card.querySelector(".color-hex").textContent.trim();
-                                
-                                // Создаем опции с текстом цвета
-                                const bgOption = document.createElement("option");
-                                bgOption.value = colorHex;
-                                bgOption.textContent = colorHex;
-                                backgroundColorSelect.appendChild(bgOption);
-                                
-                                const textOption = document.createElement("option");
-                                textOption.value = colorHex;
-                                textOption.textContent = colorHex;
-                                textColorSelect.appendChild(textOption);
-                            });
-                        } else {
-                            console.warn("В галерее не найдены цвета. Добавьте сначала основные цвета.");
-                            const option = document.createElement("option");
-                            option.textContent = "Нет доступных цветов";
-                            option.disabled = true;
-                            backgroundColorSelect.appendChild(option.cloneNode(true));
-                            textColorSelect.appendChild(option);
-                        }
-                    } else {
-                        console.warn("Не удалось найти галерею цветов или селекты для модального окна.");
-                    }
-
-                    // Открываем модальное окно
-                    try {
-                        const modalInstance = new bootstrap.Modal(addPairedColorsModal);
-                        modalInstance.show();
-                        console.log("Модальное окно 'addPairedColorsModal' отображено."); // Отладочное сообщение
-                    } catch (error) {
-                        console.error("Ошибка при попытке отобразить модальное окно:", error);
-                    }
-                });
-            } else {
-                console.error("Кнопка 'Добавить парные цвета' или модальное окно 'addPairedColorsModal' не найдены.");
-            }
+            setupAddPairedColorsButtons(brandItem);
         });
     }
 
@@ -330,13 +273,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const pairedColorsGallery = document.querySelector(".paired-colors-gallery");
     const addPairedColorsForm = document.getElementById("addPairedColorsForm");
 
+    // Обновляем обработчик отправки формы с парными цветами
     if (addPairedColorsForm) {
         addPairedColorsForm.addEventListener("submit", (e) => {
             e.preventDefault();
 
-            const backgroundColor = document.getElementById("backgroundColor").value;
-            const textColor = document.getElementById("textColor").value;
+            // Получаем выбранные цвета из скрытых полей
+            const backgroundColor = document.getElementById("selectedBackgroundColor").value;
+            const textColor = document.getElementById("selectedTextColor").value;
             const allowInversion = document.getElementById("allowInversion").checked;
+
+            // Проверяем, что цвета выбраны
+            if (!backgroundColor || !textColor) {
+                alert("Пожалуйста, выберите цвета для фона и текста.");
+                return;
+            }
 
             // Получаем ID активного бренда
             const activeBrandId = getActiveBrandId();
@@ -531,5 +482,165 @@ document.addEventListener("DOMContentLoaded", () => {
                 addColorModal.hide();
             }
         });
+    }
+
+    // Добавляем функцию для создания кастомного селекта
+    function createCustomColorSelect(containerEl, options, onChangeCallback) {
+        // Очищаем контейнер
+        containerEl.innerHTML = '';
+        
+        // Создаем элементы кастомного селекта
+        const customSelect = document.createElement('div');
+        customSelect.className = 'custom-color-select';
+        
+        const selectHeader = document.createElement('div');
+        selectHeader.className = 'select-header';
+        
+        const selectDropdown = document.createElement('div');
+        selectDropdown.className = 'select-dropdown';
+        
+        // Скрытый оригинальный селект для сохранения формы
+        const hiddenSelect = document.createElement('select');
+        hiddenSelect.style.display = 'none';
+        hiddenSelect.name = containerEl.id;
+        
+        // Добавляем опции в выпадающий список и скрытый селект
+        let firstOption = null;
+        options.forEach((option, index) => {
+            // Создаем опцию для выпадающего списка
+            const selectOption = document.createElement('div');
+            selectOption.className = 'select-option';
+            selectOption.dataset.value = option.value;
+            
+            const colorPreview = document.createElement('div');
+            colorPreview.className = 'select-color-preview';
+            colorPreview.style.backgroundColor = option.value;
+            
+            const colorValue = document.createElement('div');
+            colorValue.className = 'select-color-value';
+            colorValue.textContent = option.value;
+            
+            selectOption.appendChild(colorPreview);
+            selectOption.appendChild(colorValue);
+            selectDropdown.appendChild(selectOption);
+            
+            // Добавляем опцию в скрытый селект
+            const hiddenOption = document.createElement('option');
+            hiddenOption.value = option.value;
+            hiddenOption.textContent = option.value;
+            hiddenSelect.appendChild(hiddenOption);
+            
+            // Сохраняем первую опцию
+            if (index === 0) firstOption = option;
+            
+            // Добавляем обработчик клика на опцию
+            selectOption.addEventListener('click', () => {
+                // Обновляем заголовок селекта
+                updateSelectHeader(selectHeader, option.value);
+                
+                // Обновляем значение скрытого селекта
+                hiddenSelect.value = option.value;
+                
+                // Скрываем выпадающий список
+                selectDropdown.style.display = 'none';
+                selectHeader.classList.remove('active');
+                
+                // Устанавливаем класс selected для выбранной опции
+                const options = selectDropdown.querySelectorAll('.select-option');
+                options.forEach(opt => opt.classList.remove('selected'));
+                selectOption.classList.add('selected');
+                
+                // Вызываем callback, если он передан
+                if (onChangeCallback) onChangeCallback(option.value);
+            });
+        });
+        
+        // Инициализация заголовка селекта с первой опцией
+        if (firstOption) {
+            updateSelectHeader(selectHeader, firstOption.value);
+            hiddenSelect.value = firstOption.value;
+        }
+        
+        // Добавляем обработчик клика на заголовок
+        selectHeader.addEventListener('click', () => {
+            const isOpen = selectDropdown.style.display === 'block';
+            selectDropdown.style.display = isOpen ? 'none' : 'block';
+            selectHeader.classList.toggle('active', !isOpen);
+        });
+        
+        // Закрываем выпадающий список при клике вне селекта
+        document.addEventListener('click', (e) => {
+            if (!customSelect.contains(e.target)) {
+                selectDropdown.style.display = 'none';
+                selectHeader.classList.remove('active');
+            }
+        });
+        
+        // Собираем кастомный селект
+        customSelect.appendChild(selectHeader);
+        customSelect.appendChild(selectDropdown);
+        customSelect.appendChild(hiddenSelect);
+        
+        // Добавляем селект в контейнер
+        containerEl.appendChild(customSelect);
+        
+        return {
+            element: customSelect,
+            hiddenSelect: hiddenSelect,
+            getValue: () => hiddenSelect.value,
+            setValue: (value) => {
+                // Обновляем заголовок и скрытый селект
+                updateSelectHeader(selectHeader, value);
+                hiddenSelect.value = value;
+                
+                // Обновляем класс selected для опций
+                const options = selectDropdown.querySelectorAll('.select-option');
+                options.forEach(opt => {
+                    opt.classList.toggle('selected', opt.dataset.value === value);
+                });
+            }
+        };
+    }
+
+    // Вспомогательная функция для обновления заголовка селекта
+    function updateSelectHeader(header, colorValue) {
+        header.innerHTML = '';
+        
+        const colorPreview = document.createElement('div');
+        colorPreview.className = 'select-color-preview';
+        colorPreview.style.backgroundColor = colorValue;
+        
+        const colorValueElement = document.createElement('div');
+        colorValueElement.className = 'select-color-value';
+        colorValueElement.textContent = colorValue;
+        
+        header.appendChild(colorPreview);
+        header.appendChild(colorValueElement);
+    }
+
+    // Обновление обработчика для кнопок "Добавить парные цвета"
+    function setupAddPairedColorsButtons(brandItem) {
+        const addPairedColorsButton = brandItem.querySelector("#addPairedColors");
+        const pairedColorsBlock = brandItem.querySelector("#pairedColorsBlock");
+
+        if (addPairedColorsButton && pairedColorsBlock) {
+            // Удаляем все существующие обработчики события click
+            addPairedColorsButton.replaceWith(addPairedColorsButton.cloneNode(true));
+            
+            // Получаем новую ссылку на клонированную кнопку
+            const newButton = brandItem.querySelector("#addPairedColors");
+            
+            // Устанавливаем новый обработчик
+            newButton.addEventListener("click", function() {
+                // Показываем блок парных цветов
+                if (pairedColorsBlock) {
+                    pairedColorsBlock.style.display = "block";
+                }
+                
+                // Используем атрибуты data для модального окна вместо событийной модели
+                newButton.setAttribute('data-bs-toggle', 'modal');
+                newButton.setAttribute('data-bs-target', '#addPairedColorsModal');
+            });
+        }
     }
 });

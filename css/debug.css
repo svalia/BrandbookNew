@@ -1,0 +1,9 @@
+/* Стили для отладки */
+.colors-grid {
+    border: 1px dashed red;
+    min-height: 50px;
+}
+
+.color-option-card {
+    border: 1px solid blue !important;
+}
