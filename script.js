@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join('');
     }
 
-    function openEditor(targetElement) {
+    function openEditor(targetElement, existingContent = "") {
         const editorModal = document.createElement("div");
         editorModal.className = "editor-modal";
         editorModal.innerHTML = `
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <button data-action="ol">1.</button>
                 </div>
                 <div class="editor-content">
-                    <textarea id="wysiwyg-editor" maxlength="10000" placeholder="Добавьте описание"></textarea>
+                    <textarea id="wysiwyg-editor" maxlength="10000" placeholder="Добавьте описание">${existingContent}</textarea>
                 </div>
                 <div class="editor-actions">
                     <button class="btn-cancel">Отмена</button>
@@ -255,10 +255,16 @@ document.addEventListener("DOMContentLoaded", () => {
             // Удаляем модальное окно
             document.body.removeChild(editorModal);
 
+            // Удаляем кнопку "Добавить описание", если она есть
+            const addDescriptionButton = targetElement.closest(".description-block").querySelector(".add-description-btn");
+            if (addDescriptionButton) {
+                addDescriptionButton.remove();
+            }
+
             // Добавляем обработчик для кнопки "Редактировать"
             const editButton = targetElement.querySelector(".edit-description-btn");
             editButton.addEventListener("click", () => {
-                openEditor(targetElement);
+                openEditor(targetElement, content); // Передаём существующий текст для редактирования
             });
         });
 
