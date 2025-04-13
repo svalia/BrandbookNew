@@ -231,8 +231,9 @@ function createColorOptionCard(colorHex, previewStyle) {
     card.className = 'color-option-card';
     card.dataset.color = colorHex;
     
+    // Исправим создание превью цвета - напрямую устанавливаем background-color
     card.innerHTML = `
-        <div class="color-option-preview" ${previewStyle || `style="background-color: ${colorHex}"`}></div>
+        <div class="color-option-preview" style="background-color: ${colorHex}"></div>
         <div class="color-option-value">${colorHex}</div>
     `;
     
