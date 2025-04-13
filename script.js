@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             brandsList.appendChild(brandItem);
 
-            // Добавляем обработчик для сворачивания/разворачивания секции бренда
+            // Добавляем обработчики для сворачивания/разворачивания секций бренда
             const toggleSection = brandItem.querySelector(".toggle-section");
             const brandContent = brandItem.querySelector(".brand-sections-content");
             const toggleIcon = toggleSection.querySelector(".section-toggle-icon");
@@ -95,6 +95,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 const isVisible = brandContent.style.display === "block";
                 brandContent.style.display = isVisible ? "none" : "block";
                 toggleIcon.src = isVisible ? "img_src/chevron-down-green.svg" : "img_src/chevron-up-green.svg";
+            });
+
+            // Добавляем обработчики для дочерних секций
+            const sectionItems = brandItem.querySelectorAll(".section-item");
+            sectionItems.forEach(item => {
+                const sectionHeader = item.querySelector(".section-header");
+                const sectionContent = item.querySelector(".section-content");
+                const sectionIcon = sectionHeader.querySelector(".section-toggle-icon");
+
+                sectionHeader.addEventListener("click", () => {
+                    const isVisible = sectionContent.style.display === "block";
+                    sectionContent.style.display = isVisible ? "none" : "block";
+                    sectionIcon.src = isVisible ? 
+                        "img_src/chevron-down-gray.svg" : 
+                        "img_src/chevron-up-gray.svg";
+                });
             });
 
             // Добавляем обработчик для кнопки удаления бренда
