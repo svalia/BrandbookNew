@@ -234,8 +234,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const cancelButton = editorModal.querySelector(".btn-cancel");
 
         saveButton.addEventListener("click", () => {
-            targetElement.innerHTML = textarea.value;
+            const content = textarea.value; // Получаем текст из редактора
+            console.log("Сохраняем текст:", content); // Отладочное сообщение
+
+            if (typeof marked.parse === "function") {
+                // Используем marked.parse для преобразования Markdown в HTML
+                targetElement.innerHTML = `
+                    <div class="formatted-description">${marked.parse(content)}</div>
+                    <button class="btn btn-secondary edit-description-btn">Редактировать</button>
+                `;
+                console.log("Текст успешно преобразован с помощью marked.parse");
+            } else {
+                console.error("Библиотека marked.js не поддерживает parse");
+                targetElement.innerHTML = `
+                    <div class="formatted-description" style="white-space: pre-wrap;">${content}</div>
+                    <button class="btn btn-secondary edit-description-btn">Редактировать</button>
+                `;
+            }
+
+            // Удаляем модальное окно
             document.body.removeChild(editorModal);
+
+            // Добавляем обработчик для кнопки "Редактировать"
+            const editButton = targetElement.querySelector(".edit-description-btn");
+            editButton.addEventListener("click", () => {
+                openEditor(targetElement);
+            });
         });
 
         cancelButton.addEventListener("click", () => {

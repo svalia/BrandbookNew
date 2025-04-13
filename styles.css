@@ -323,3 +323,42 @@ h1 {
     padding: 10px 20px;
     margin-bottom: 10px;
 }
+
+.formatted-description {
+    padding: 10px 20px;
+    font-family: 'SB Sans Display', Arial, sans-serif;
+    font-size: 14px;
+    color: #4A4C4B;
+    line-height: 1.5;
+    white-space: normal; /* Для отображения HTML-разметки */
+}
+
+.formatted-description h1,
+.formatted-description h2,
+.formatted-description h3,
+.formatted-description h4 {
+    margin: 10px 0;
+    font-weight: 600;
+}
+
+.formatted-description ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.formatted-description ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.formatted-description li {
+    margin-bottom: 5px;
+}
+
+.formatted-description strong {
+    font-weight: bold;
+}
+
+.formatted-description em {
+    font-style: italic;
+}
