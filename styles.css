@@ -8,7 +8,6 @@ h1 {
     font-size: 32px;
     font-weight: 600;
     color: #1D953C;
-    text-align: center;
 }
 
 .container {
@@ -215,6 +214,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 8px; /* Расстояние между названием бренда и шевроном */
+    margin-bottom: 0px !important;
 }
 
 .section-item {
@@ -237,7 +237,7 @@ h1 {
 }
 
 .section-content {
-    padding: 15px;
+    padding-bottom: 15px;
 }
 
 .editor-modal {
@@ -383,12 +383,12 @@ h1 {
 }
 
 .description-content {
-    padding: 10px 20px;
+    padding: 0px;
     margin-bottom: 10px;
 }
 
 .formatted-description {
-    padding: 10px 0;
+    padding: 0px;
     font-family: 'SB Sans Display', Arial, sans-serif;
     font-size: 14px;
     color: #4A4C4B;

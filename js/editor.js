@@ -17,8 +17,24 @@ function openEditor(contentElement) {
     const editorModal = document.createElement('div');
     editorModal.className = 'editor-modal';
     
-    // Получаем текущее содержимое
-    const currentContent = contentElement.innerHTML || '';
+    // Получаем текущее содержимое - очищаем от кнопок редактирования
+    let currentContent = '';
+    
+    // Находим formatted-description внутри contentElement или используем все содержимое
+    const formattedDesc = contentElement.querySelector('.formatted-description');
+    if (formattedDesc) {
+        currentContent = formattedDesc.innerHTML;
+    } else {
+        // Создаем временный контейнер для фильтрации содержимого
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = contentElement.innerHTML;
+        
+        // Удаляем все кнопки редактирования, если они есть
+        const editButtons = tempDiv.querySelectorAll('.edit-description-btn');
+        editButtons.forEach(btn => btn.remove());
+        
+        currentContent = tempDiv.innerHTML;
+    }
     
     // Формируем содержимое модального окна
     editorModal.innerHTML = `
@@ -67,27 +83,47 @@ function openEditor(contentElement) {
     
     // Обработчик кнопки Сохранить
     saveButton.addEventListener('click', function() {
-        // Сохраняем содержимое и обновляем формат
-        contentElement.innerHTML = editorElement.innerHTML;
+        // Находим родительский блок description-block
+        const descriptionBlock = contentElement.closest('.description-block');
+        if (!descriptionBlock) {
+            console.error('Не удалось найти родительский блок description-block');
+            return;
+        }
+        
+        // Очищаем contentElement
+        contentElement.innerHTML = '';
         
         // Создаем форматированное представление
         const formattedContent = document.createElement('div');
         formattedContent.className = 'formatted-description';
         formattedContent.innerHTML = editorElement.innerHTML;
         
-        // Заменяем старое содержимое
-        contentElement.innerHTML = '';
+        // Добавляем отформатированное содержимое
         contentElement.appendChild(formattedContent);
         
-        // Добавляем кнопку редактирования
-        const editButton = document.createElement('button');
-        editButton.className = 'btn btn-secondary edit-description-btn mt-3';
-        editButton.textContent = 'Редактировать';
-        editButton.addEventListener('click', function() {
-            openEditor(contentElement);
-        });
+        // Скрываем кнопку "Добавить описание" и показываем "Редактировать"
+        const addButton = descriptionBlock.querySelector('.add-description-btn');
+        if (addButton) {
+            addButton.style.display = 'none';
+        }
         
-        contentElement.appendChild(editButton);
+        // Проверяем, есть ли уже кнопка редактирования 
+        let editButton = descriptionBlock.querySelector('.edit-description-btn');
+        
+        // Если кнопки нет, создаем новую
+        if (!editButton) {
+            editButton = document.createElement('button');
+            editButton.className = 'btn btn-secondary edit-description-btn mt-3';
+            editButton.textContent = 'Редактировать';
+            editButton.addEventListener('click', function() {
+                openEditor(contentElement);
+            });
+            
+            descriptionBlock.appendChild(editButton);
+        } else {
+            // Если кнопка уже есть, убедимся что она видима
+            editButton.style.display = 'inline-block';
+        }
         
         // Закрываем редактор
         editorModal.remove();
@@ -101,3 +137,9 @@ function openEditor(contentElement) {
     // Фокус на редакторе
     editorElement.focus();
 }
+
+// Инициализация модуля при загрузке страницы
+document.addEventListener('DOMContentLoaded', initEditor);
+
+// Экспортируем функции для использования в других модулях
+window.openEditor = openEditor;

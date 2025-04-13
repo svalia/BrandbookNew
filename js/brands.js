@@ -112,7 +112,7 @@ function renderBrands() {
         brandItem.dataset.id = brand.id;
         brandItem.innerHTML = `
             <div class="toggle-section" data-id="${brand.id}">
-                <div class="brand-name-container">
+                <div class="brand-name-container h3">
                     <span>${brand.name}</span>
                     <img src="img_src/chevron-down-green.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
                 </div>
