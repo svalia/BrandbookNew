@@ -379,4 +379,13 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         reader.readAsDataURL(logoFile);
     });
+
+    const hintToggle = document.getElementById("hintToggle");
+    const hintContent = document.getElementById("hintContent");
+    const toggleIcon = hintToggle.querySelector(".toggle-icon");
+
+    hintToggle.addEventListener("click", () => {
+        hintContent.classList.toggle("show");
+        toggleIcon.classList.toggle("collapsed");
+    });
 });

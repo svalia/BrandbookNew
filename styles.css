@@ -470,8 +470,13 @@ h1 {
     border-radius: 8px; /* Закруглённые края */
     padding: 10px 15px;
     font-size: 12px; /* Мелкий текст */
-    color: #0d6efd; /* Тёмно-голубой текст */
+    color: #212529; 
     margin-bottom: 15px;
+    display: none; /* Скрываем по умолчанию */
+}
+
+.calculated-values-hint.show {
+    display: block; /* Показываем при разворачивании */
 }
 
 .calculated-values-hint p {
@@ -486,4 +491,28 @@ h1 {
 
 .calculated-values-hint li {
     margin-bottom: 5px;
+}
+
+.toggle-hint-header {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: #212529;
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.toggle-hint-header:hover {
+    background-color: #e9ecef;
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.toggle-icon.collapsed {
+    transform: rotate(-90deg);
 }

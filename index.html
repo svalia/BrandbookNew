@@ -61,6 +61,8 @@
                             <select class="form-select" id="logoColor" required>
                                 <option value="white">Белый</option>
                                 <option value="black">Чёрный</option>
+                                <option value="green">Зелёный</option>
+                                <option value="graphite">Графитовый</option>
                                 <option value="multicolor">Цветной</option>
                                 <option value="custom">Пользовательский</option>
                             </select>
@@ -114,7 +116,11 @@
                             </div>
                         </div>
                         <h6 class="calculated-values-title mt-4">Расчётные значения</h6>
-                        <div class="calculated-values-hint">
+                        <div class="toggle-hint-header d-flex align-items-center justify-content-between" id="hintToggle">
+                            <span>Зачем нужно вводить ширину и высоту лого, иконки и буквы "Б?</span>
+                            <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="toggle-icon" width="16" height="16">
+                        </div>
+                        <div class="calculated-values-hint collapse" id="hintContent">
                             <p><strong>1. Половина ширины иконки (%)</strong></p>
                             <ul>
                                 <li>Это значение используется для правильного позиционирования текста (заголовка и подзаголовка) относительно иконки.</li>
