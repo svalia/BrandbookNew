@@ -270,6 +270,9 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join('');
     }
 
+    // Закомментируем или удалим обработчик формы парных цветов из основного скрипта,
+    // так как теперь он находится в colors.js
+    /*
     const pairedColorsGallery = document.querySelector(".paired-colors-gallery");
     const addPairedColorsForm = document.getElementById("addPairedColorsForm");
 
@@ -277,104 +280,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (addPairedColorsForm) {
         addPairedColorsForm.addEventListener("submit", (e) => {
             e.preventDefault();
-
-            // Получаем выбранные цвета из скрытых полей
-            const backgroundColor = document.getElementById("selectedBackgroundColor").value;
-            const textColor = document.getElementById("selectedTextColor").value;
-            const allowInversion = document.getElementById("allowInversion").checked;
-
-            // Проверяем, что цвета выбраны
-            if (!backgroundColor || !textColor) {
-                alert("Пожалуйста, выберите цвета для фона и текста.");
-                return;
-            }
-
-            // Получаем ID активного бренда
-            const activeBrandId = getActiveBrandId();
-            if (!activeBrandId) {
-                console.error("Не удалось определить активный бренд.");
-                alert("Ошибка: Не удалось определить активный бренд.");
-                return;
-            }
-
-            // Находим галерею парных цветов для активного бренда
-            const pairedColorsGallery = document.querySelector(`#brandsList [data-id="${activeBrandId}"] #pairedColorsGallery`);
-            if (!pairedColorsGallery) {
-                console.error("Галерея парных цветов не найдена для бренда:", activeBrandId);
-                return;
-            }
-
-            // Создаем карточку парных цветов
-            const pairedColorCard = document.createElement("div");
-            pairedColorCard.className = "paired-color-card";
-            pairedColorCard.innerHTML = `
-                <div class="paired-color-header">
-                    <div class="paired-color-item">
-                        <div>Цвет фона</div>
-                        <div class="paired-color-preview" style="background: ${backgroundColor}"></div>
-                        <div>${backgroundColor}</div>
-                    </div>
-                    <div class="paired-color-item">
-                        <div>Цвет текста</div>
-                        <div class="paired-color-preview" style="background: ${textColor}"></div>
-                        <div>${textColor}</div>
-                    </div>
-                </div>
-                <div class="paired-color-sample" style="background-color: ${backgroundColor}; color: ${textColor}">Sample text</div>
-                <div class="paired-color-inversion">${allowInversion ? "✅ инверсия допустима" : "❌ инверсия недопустима"}</div>
-                ${allowInversion ? `
-                <div class="paired-color-inverted">
-                    <div class="paired-color-header">
-                        <div class="paired-color-item">
-                            <div>Цвет фона</div>
-                            <div class="paired-color-preview" style="background: ${textColor}"></div>
-                            <div>${textColor}</div>
-                        </div>
-                        <div class="paired-color-item">
-                            <div>Цвет текста</div>
-                            <div class="paired-color-preview" style="background: ${backgroundColor}"></div>
-                            <div>${backgroundColor}</div>
-                        </div>
-                    </div>
-                    <div class="paired-color-sample" style="background-color: ${textColor}; color: ${backgroundColor}">Sample text</div>
-                </div>
-                ` : ''}
-                <button class="paired-color-delete">Удалить</button>
-            `;
-
-            // Добавляем обработчик для удаления карточки
-            pairedColorCard.querySelector(".paired-color-delete").addEventListener("click", () => {
-                pairedColorCard.remove();
-            });
-
-            // Добавляем карточку в галерею
-            pairedColorsGallery.appendChild(pairedColorCard);
-
-            // Сохраняем парный цвет в данных бренда
-            const activeBrand = brands.find(brand => brand.id === activeBrandId);
-            if (activeBrand) {
-                if (!activeBrand.sections.colors) {
-                    activeBrand.sections.colors = {};
-                }
-                if (!activeBrand.sections.colors.paired) {
-                    activeBrand.sections.colors.paired = [];
-                }
-                activeBrand.sections.colors.paired.push({
-                    backgroundColor,
-                    textColor,
-                    allowInversion
-                });
-            }
-
-            // Закрываем модальное окно
-            const addPairedColorsModal = bootstrap.Modal.getInstance(document.getElementById("addPairedColorsModal"));
-            if (addPairedColorsModal) {
-                addPairedColorsModal.hide();
-            } else {
-                console.error("Не удалось найти экземпляр модального окна для парных цветов");
-            }
+            // ... остальной код обработчика
         });
     }
+    */
 
     // Функция для получения ID активного бренда
     function getActiveBrandId() {
@@ -618,29 +527,12 @@ document.addEventListener("DOMContentLoaded", () => {
         header.appendChild(colorValueElement);
     }
 
-    // Обновление обработчика для кнопок "Добавить парные цвета"
+    // Обновленная версия функции setupAddPairedColorsButtons - оставляем пустой,
+    // так как настройку кнопок теперь выполняет colors.js
     function setupAddPairedColorsButtons(brandItem) {
-        const addPairedColorsButton = brandItem.querySelector("#addPairedColors");
-        const pairedColorsBlock = brandItem.querySelector("#pairedColorsBlock");
-
-        if (addPairedColorsButton && pairedColorsBlock) {
-            // Удаляем все существующие обработчики события click
-            addPairedColorsButton.replaceWith(addPairedColorsButton.cloneNode(true));
-            
-            // Получаем новую ссылку на клонированную кнопку
-            const newButton = brandItem.querySelector("#addPairedColors");
-            
-            // Устанавливаем новый обработчик
-            newButton.addEventListener("click", function() {
-                // Показываем блок парных цветов
-                if (pairedColorsBlock) {
-                    pairedColorsBlock.style.display = "block";
-                }
-                
-                // Используем атрибуты data для модального окна вместо событийной модели
-                newButton.setAttribute('data-bs-toggle', 'modal');
-                newButton.setAttribute('data-bs-target', '#addPairedColorsModal');
-            });
-        }
+        // Пустая функция, так как настройка теперь происходит в colors.js
     }
 });
+
+// Экспортируем brands в глобальный объект для доступа из других скриптов
+window.brands = brands;
