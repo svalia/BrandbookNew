@@ -1,34 +1,80 @@
-// Инициализация формы добавления бренда
-function initBrandForm() {
-    const brandsList = document.getElementById("brandsList");
-    const addBrandForm = document.getElementById("addBrandForm");
+// Глобальная переменная для хранения брендов
+window.brands = [];
+
+// Функция инициализации модуля брендов
+function initBrands() {
+    console.log('Brands module initialized');
+    
+    // Инициализация формы добавления бренда
+    const addBrandForm = document.getElementById('addBrandForm');
+    const brandsList = document.getElementById('brandsList');
     const addBrandButton = document.querySelector('[data-bs-target="#addBrandModal"]');
-
-    if (!brandsList || !addBrandForm) {
-        console.error("Не удалось найти элементы brandsList или addBrandForm");
-        return;
+    
+    if (addBrandButton) {
+        // Обновляем кнопку "Добавить бренд"
+        addBrandButton.classList.add("btn-add-brand");
+        addBrandButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Добавить бренд
+        `;
     }
-
-    // Обработчик формы добавления бренда
-    addBrandForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const brandName = document.getElementById("brandName").value.trim();
-        if (brandName) {
+    
+    // Инициализация подсказки для логотипов
+    const hintToggle = document.getElementById("hintToggle");
+    if (hintToggle) {
+        const hintContent = document.getElementById("hintContent");
+        const toggleIcon = hintToggle.querySelector(".toggle-icon");
+        
+        hintToggle.addEventListener("click", () => {
+            hintContent.classList.toggle("show");
+            toggleIcon.classList.toggle("collapsed");
+        });
+    }
+    
+    // Проверяем наличие формы добавления бренда
+    if (addBrandForm) {
+        addBrandForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const brandNameInput = document.getElementById('brandName');
+            if (!brandNameInput) {
+                console.error('Поле имени бренда не найдено');
+                return;
+            }
+            
+            const brandName = brandNameInput.value.trim();
+            if (!brandName) {
+                console.warn('Название бренда не может быть пустым');
+                return;
+            }
+            
+            console.log(`Добавляем бренд: ${brandName}`);
+            
+            // Создаем новый бренд
             const newBrand = {
                 id: Date.now(),
                 name: brandName,
-                sections: {}
+                sections: {} // Пустые секции для будущей реализации
             };
-            brands.push(newBrand);
-            console.log("Добавлен бренд:", newBrand.name);
+            
+            // Добавляем бренд в глобальный массив
+            window.brands.push(newBrand);
+            console.log('Текущий список брендов:', window.brands);
+            
+            // Рендерим список брендов
             renderBrands();
+            
+            // Сбрасываем форму
             addBrandForm.reset();
-
+            
             // Закрываем модальное окно
-            const addBrandModal = bootstrap.Modal.getInstance(document.getElementById("addBrandModal"));
-            if (addBrandModal) {
-                addBrandModal.hide();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addBrandModal'));
+            if (modal) {
+                modal.hide();
+                
                 // Добавляем задержку перед переносом фокуса
                 setTimeout(() => {
                     if (addBrandButton) {
@@ -36,122 +82,241 @@ function initBrandForm() {
                     }
                 }, 300);
             }
-        } else {
-            console.warn("Название бренда не может быть пустым");
-        }
-    });
+        });
+    } else {
+        console.error('Форма добавления бренда не найдена');
+    }
 }
 
 // Функция для отображения списка брендов
 function renderBrands() {
-    const brandsList = document.getElementById("brandsList");
-    if (!brandsList) return;
-
-    brandsList.innerHTML = "";
-    brands.forEach((brand) => {
-        const brandItem = createBrandElement(brand);
+    const brandsList = document.getElementById('brandsList');
+    if (!brandsList) {
+        console.error('Контейнер брендов не найден');
+        return;
+    }
+    
+    console.log('Обновляем список брендов');
+    brandsList.innerHTML = '';
+    
+    if (!window.brands || window.brands.length === 0) {
+        console.log('Список брендов пуст');
+        return;
+    }
+    
+    window.brands.forEach((brand) => {
+        console.log(`Добавляем бренд в список: ${brand.name}`);
+        
+        const brandItem = document.createElement('div');
+        brandItem.className = 'brand-item';
+        brandItem.dataset.id = brand.id;
+        brandItem.innerHTML = `
+            <div class="toggle-section" data-id="${brand.id}">
+                <div class="brand-name-container">
+                    <span>${brand.name}</span>
+                    <img src="img_src/chevron-down-green.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                </div>
+                <button class="btn btn-danger btn-sm" data-id="${brand.id}">Удалить</button>
+            </div>
+            <div class="brand-sections-content">
+                <ul class="list-group">
+                    ${renderSections()}
+                </ul>
+            </div>
+        `;
         brandsList.appendChild(brandItem);
+        
+        // Настраиваем обработчики событий для бренда
+        setupBrandEvents(brandItem, brand.id);
     });
 }
 
-// Создание элемента бренда
-function createBrandElement(brand) {
-    const brandItem = document.createElement("div");
-    brandItem.className = "brand-item";
-    brandItem.dataset.id = brand.id;
+// Функция для рендеринга секций бренда
+function renderSections() {
+    const sections = [
+        "Описание бренда", 
+        "Тональность коммуникации", 
+        "Логотипы", 
+        "Цвета и цветовые стили", 
+        "Типографика", 
+        "Текстуры, Градиенты, Ключевые персонажи/элементы, Графические элементы и Рекламные материалы"
+    ];
     
-    brandItem.innerHTML = `
-        <div class="toggle-section" data-id="${brand.id}">
-            <div class="brand-name-container">
-                <span>${brand.name}</span>
-                <img src="img_src/chevron-down-green.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+    return sections.map(section => `
+        <li class="list-group-item section-item">
+            <div class="section-header">
+                <div class="section-title">
+                    <span>${section}</span>
+                    <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                </div>
             </div>
-            <button class="btn btn-danger btn-sm" data-id="${brand.id}">Удалить</button>
+            <div class="section-content" style="display: none;">
+                <div class="description-block">
+                    <div class="description-content"></div>
+                    <button class="add-description-btn btn btn-primary">Добавить описание</button>
+                </div>
+                ${section === "Цвета и цветовые стили" ? renderColorSection() : ""}
+                ${section === "Логотипы" ? renderLogoSection() : ""}
+            </div>
+        </li>
+    `).join('');
+}
+
+// Функция для рендеринга секции цветов
+function renderColorSection() {
+    return `
+        <div class="color-actions mt-3">
+            <button class="add-description-btn btn btn-primary" id="addColor">Добавить цвет</button>
+            <button class="add-description-btn btn btn-primary" id="addPairedColors">Добавить парные цвета</button>
+            <button class="add-description-btn btn btn-primary" id="addPalette">Добавить палитру</button>
         </div>
-        <div class="brand-sections-content">
-            <ul class="list-group">
-                ${renderSections()}
-            </ul>
+        <div id="colorBlocks">
+            <div class="color-block" id="mainColorsBlock" style="display: none;">
+                <h3>Основные и дополнительные цвета</h3>
+                <div class="color-gallery" id="mainColorsGallery">
+                    <!-- Карточки цветов будут добавляться здесь -->
+                </div>
+            </div>
+            <div class="color-block" id="pairedColorsBlock" style="display: none;">
+                <h3>Парные цвета</h3>
+                <div class="paired-colors-gallery" id="pairedColorsGallery">
+                    <!-- Карточки парных цветов будут добавляться здесь -->
+                </div>
+            </div>
+            <div class="color-block" id="palettesBlock" style="display: none;">
+                <h3>Палитры цветов</h3>
+                <div class="palettes-gallery" id="palettesGallery">
+                    <!-- Карточки палитр будут добавляться здесь -->
+                </div>
+            </div>
         </div>
     `;
-
-    // Добавляем обработчики
-    setupBrandToggle(brandItem, brand);
-    setupSectionToggles(brandItem);
-    setupDeleteButton(brandItem);
-    setupDescriptionButtons(brandItem);
-    setupColorButtons(brandItem, brand);
-    
-    return brandItem;
 }
 
-// Настройка кнопки разворачивания/сворачивания бренда
-function setupBrandToggle(brandItem, brand) {
-    const toggleSection = brandItem.querySelector(".toggle-section");
-    const brandContent = brandItem.querySelector(".brand-sections-content");
-    const toggleIcon = toggleSection.querySelector(".section-toggle-icon");
-    
-    toggleSection.addEventListener("click", (e) => {
-        if (e.target.tagName === "BUTTON") return;
-        const isVisible = brandContent.style.display === "block";
-        brandContent.style.display = isVisible ? "none" : "block";
-        toggleIcon.src = isVisible ? "img_src/chevron-down-green.svg" : "img_src/chevron-up-green.svg";
-    });
+// Функция для рендеринга секции логотипов
+function renderLogoSection() {
+    return `
+        <button class="btn btn-success mt-3 add-logo-btn" data-bs-toggle="modal" data-bs-target="#addLogoModal">Добавить логотип</button>
+        <div class="logos-gallery mt-4">
+            <!-- Галерея логотипов будет динамически добавляться -->
+        </div>
+    `;
 }
 
-// Настройка разворачивания/сворачивания секций
-function setupSectionToggles(brandItem) {
-    const sectionItems = brandItem.querySelectorAll(".section-item");
+// Настройка обработчиков событий для бренда
+function setupBrandEvents(brandItem, brandId) {
+    // Обработчик сворачивания/разворачивания бренда
+    const toggleSection = brandItem.querySelector('.toggle-section');
+    const brandContent = brandItem.querySelector('.brand-sections-content');
+    const toggleIcon = toggleSection.querySelector('.section-toggle-icon');
     
+    if (toggleSection && brandContent && toggleIcon) {
+        toggleSection.addEventListener('click', function(e) {
+            // Игнорируем клик по кнопке удаления
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                return;
+            }
+            
+            const isVisible = brandContent.style.display === 'block';
+            brandContent.style.display = isVisible ? 'none' : 'block';
+            toggleIcon.src = isVisible ? 'img_src/chevron-down-green.svg' : 'img_src/chevron-up-green.svg';
+        });
+    }
+    
+    // Обработчик удаления бренда
+    const deleteButton = brandItem.querySelector('.btn-danger');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', function() {
+            window.brands = window.brands.filter((brand) => brand.id !== brandId);
+            renderBrands();
+        });
+    }
+    
+    // Добавляем обработчики для дочерних секций
+    const sectionItems = brandItem.querySelectorAll('.section-item');
     sectionItems.forEach(item => {
-        const sectionHeader = item.querySelector(".section-header");
-        const sectionContent = item.querySelector(".section-content");
-        const sectionIcon = sectionHeader ? sectionHeader.querySelector(".section-toggle-icon") : null;
-
+        const sectionHeader = item.querySelector('.section-header');
+        const sectionContent = item.querySelector('.section-content');
+        const sectionIcon = sectionHeader ? sectionHeader.querySelector('.section-toggle-icon') : null;
+        
         if (sectionHeader && sectionContent) {
-            sectionHeader.addEventListener("click", () => {
-                const isVisible = sectionContent.style.display === "block";
-                sectionContent.style.display = isVisible ? "none" : "block";
+            sectionHeader.addEventListener('click', () => {
+                const isVisible = sectionContent.style.display === 'block';
+                sectionContent.style.display = isVisible ? 'none' : 'block';
+                
                 if (sectionIcon) {
                     sectionIcon.src = isVisible ? 
-                        "img_src/chevron-down-gray.svg" : 
-                        "img_src/chevron-up-gray.svg";
+                        'img_src/chevron-down-gray.svg' : 
+                        'img_src/chevron-up-gray.svg';
                 }
             });
         }
     });
-}
-
-// Настройка кнопки удаления бренда
-function setupDeleteButton(brandItem) {
-    const deleteButton = brandItem.querySelector(".btn.btn-danger");
     
-    deleteButton.addEventListener("click", (e) => {
-        const brandId = parseInt(e.target.getAttribute("data-id"), 10);
-        brands = brands.filter((brand) => brand.id !== brandId);
-        renderBrands();
-    });
+    // Добавляем обработчик для кнопки "Добавить описание"
+    const addDescriptionButtons = brandItem.querySelectorAll('.add-description-btn');
+    if (addDescriptionButtons && addDescriptionButtons.length > 0) {
+        addDescriptionButtons.forEach((button) => {
+            if (button && !button.id) { // Только для кнопок без ID (не цветовые кнопки)
+                button.addEventListener('click', (e) => {
+                    const descriptionBlock = e.target.closest('.description-block');
+                    if (descriptionBlock) {
+                        const descriptionContent = descriptionBlock.querySelector('.description-content');
+                        if (descriptionContent && typeof openEditor === 'function') {
+                            openEditor(descriptionContent);
+                        } else {
+                            console.warn('Не удалось найти элемент description-content или функцию openEditor');
+                        }
+                    }
+                });
+            }
+        });
+    }
+    
+    // Настраиваем кнопки управления цветами
+    setupColorButtons(brandItem);
 }
 
-// Получение ID активного бренда
+// Настройка кнопок для работы с цветами
+function setupColorButtons(brandItem) {
+    // Кнопка добавления основного цвета
+    const addColorButton = brandItem.querySelector('#addColor');
+    if (addColorButton) {
+        addColorButton.addEventListener('click', function() {
+            const mainColorsBlock = brandItem.querySelector('#mainColorsBlock');
+            if (mainColorsBlock) {
+                mainColorsBlock.style.display = 'block';
+            }
+            
+            const addColorModal = new bootstrap.Modal(document.getElementById('addColorModal'));
+            if (addColorModal) {
+                addColorModal.show();
+            }
+        });
+    }
+    
+    // Кнопки для парных цветов и палитр настраиваются в модуле colors.js
+}
+
+// Функция для получения ID активного бренда
 function getActiveBrandId() {
-    const activeBrandElement = document.querySelector(".brand-item .brand-sections-content[style*='display: block']");
+    const activeBrandElement = document.querySelector('.brand-item .brand-sections-content[style*="display: block"]');
     if (activeBrandElement) {
-        const brandItem = activeBrandElement.closest(".brand-item");
+        const brandItem = activeBrandElement.closest('.brand-item');
         if (brandItem && brandItem.dataset && brandItem.dataset.id) {
             return parseInt(brandItem.dataset.id, 10);
         }
     }
     
-    // Если активный бренд не найден через открытую секцию, берем первый бренд из списка
-    const firstBrand = document.querySelector(".brand-item");
+    // Если активный бренд не найден через открытую секцию, берем первый бренд
+    const firstBrand = document.querySelector('.brand-item');
     if (firstBrand && firstBrand.dataset && firstBrand.dataset.id) {
         return parseInt(firstBrand.dataset.id, 10);
     }
     
     // Если все еще не нашли, используем первый бренд из массива данных
-    if (brands.length > 0) {
-        return brands[0].id;
+    if (window.brands && window.brands.length > 0) {
+        return window.brands[0].id;
     }
     
     return null;

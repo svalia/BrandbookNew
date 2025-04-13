@@ -45,3 +45,44 @@ function setupHints() {
         });
     }
 }
+
+// Основной файл, инициализирующий приложение
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Main script loaded');
+    
+    // Инициализируем функциональность брендов
+    if (typeof initBrands === 'function') {
+        initBrands();
+    } else {
+        console.warn('Function initBrands not found');
+    }
+    
+    // Инициализируем работу с цветами
+    if (typeof initColors === 'function') {
+        initColors();
+    } else {
+        console.warn('Function initColors not found');
+    }
+    
+    // Инициализируем работу с редактором
+    if (typeof initEditor === 'function') {
+        initEditor();
+    } else {
+        console.warn('Function initEditor not found');
+    }
+    
+    // Инициализируем работу с логотипами
+    if (typeof initLogos === 'function') {
+        initLogos();
+    } else {
+        console.warn('Function initLogos not found');
+    }
+    
+    // Инициализируем работу с секциями
+    if (typeof initSections === 'function') {
+        initSections();
+    } else {
+        console.warn('Function initSections not found');
+    }
+});

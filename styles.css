@@ -218,12 +218,15 @@ h1 {
 }
 
 .section-item {
-    padding: 10px 20px;
+    padding: 0;
+    overflow: hidden;
     border-radius: 8px;
     border: 1px solid rgba(175, 175, 175, 0.33);
 }
 
 .section-header {
+    padding: 10px 15px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 9px;
@@ -231,6 +234,10 @@ h1 {
     font-size: 16px;
     font-family: 'SB Sans Display', sans-serif;
     font-weight: 600;
+}
+
+.section-content {
+    padding: 15px;
 }
 
 .editor-modal {
@@ -273,11 +280,12 @@ h1 {
 }
 
 .editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
     padding: 8px 20px;
     background: white;
     border-bottom: 1px solid #E4E4E4;
-    display: flex;
-    gap: 10px;
 }
 
 .editor-content {
@@ -288,12 +296,14 @@ h1 {
 #wysiwyg-editor {
     width: 100%;
     height: 100%;
-    padding: 10px;
+    min-height: 300px;
+    padding: 15px;
     border: none;
-    background: transparent;
+    background: white;
     font-family: 'SB Sans Display', sans-serif;
     font-size: 16px;
-    resize: vertical;
+    line-height: 1.5;
+    overflow-y: auto;
 }
 
 .editor-actions {
@@ -337,6 +347,20 @@ h1 {
     cursor: pointer;
 }
 
+.edit-description-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.edit-description-btn:hover {
+    background-color: #5a6268;
+}
+
 .add-logo-btn {
     padding: 6px 12px;
     background: #1D953C;
@@ -364,24 +388,22 @@ h1 {
 }
 
 .formatted-description {
-    padding: 10px 20px;
+    padding: 10px 0;
     font-family: 'SB Sans Display', Arial, sans-serif;
     font-size: 14px;
     color: #4A4C4B;
     line-height: 1.5;
-    white-space: normal; /* Для отображения HTML-разметки */
 }
 
 .formatted-description h1,
 .formatted-description h2,
 .formatted-description h3,
 .formatted-description h4 {
-    margin: 10px 0;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #4A4C4B; /* Устанавливаем цвет текста */
-    text-align: left; /* Убираем возможное центрирование */
-    padding: 0; /* Убираем отступы */
-    margin-left: 0; /* Убираем левый отступ */
+    color: #4A4C4B;
+    line-height: 1.2;
 }
 
 .formatted-description h1 {
@@ -401,18 +423,18 @@ h1 {
     font-size: 16px;
 }
 
-.formatted-description ul {
-    margin: 10px 0;
-    padding-left: 20px;
+.formatted-description p {
+    margin-bottom: 0.75rem;
 }
 
+.formatted-description ul,
 .formatted-description ol {
-    margin: 10px 0;
-    padding-left: 20px;
+    margin: 0.75rem 0;
+    padding-left: 2rem;
 }
 
 .formatted-description li {
-    margin-bottom: 5px;
+    margin-bottom: 0.5rem;
 }
 
 .formatted-description strong {
@@ -430,7 +452,7 @@ h1 {
 }
 
 .logo-card {
-    position: relative; /* Для позиционирования кнопки удаления */
+    position: relative;
     background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -438,8 +460,39 @@ h1 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 200px;
     text-align: center;
-    overflow: hidden; /* Убираем выход текста за границы */
-    word-wrap: break-word; /* Переносим длинные слова */
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.logo-filename {
+    font-size: 13px;
+    word-wrap: break-word;
+    word-break: break-all;
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    line-height: 1.3;
+}
+
+.logo-calculated-values {
+    font-size: 12px;
+    color: #6c757d;
+    line-height: 1.2;
+}
+
+.logo-calculated-values small {
+    display: inline-block;
+    margin-bottom: 3px;
+}
+
+.logo-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #f6f6f6, #e9e9e9);
+    padding: 10px;
+    display: inline-block;
 }
 
 .delete-logo-btn {
@@ -462,16 +515,6 @@ h1 {
 .delete-icon {
     width: 16px;
     height: 16px;
-}
-
-.logo-preview {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    background: linear-gradient(135deg, #f6f6f6, #e9e9e9); /* Добавляем фон под логотип */
-    padding: 10px; /* Отступы вокруг логотипа */
-    display: inline-block;
 }
 
 .logo-details {
@@ -924,4 +967,87 @@ h1 {
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
+}
+
+/* Стили для палитр */
+.palette-card {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.10);
+}
+
+.palette-name {
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 16px;
+    color: #212529;
+}
+
+.palette-colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.palette-color-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.palette-color-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 100%;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.19);
+}
+
+.palette-color-hex {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #666;
+}
+
+.delete-palette-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px;
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.delete-palette-btn:hover {
+    background-color: rgba(215, 52, 62, 0.1);
+}
+
+/* Стили для предпросмотра палитры */
+.palette-colors-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.palette-preview .invalid .palette-color-circle {
+    border: 2px solid #dc3545;
+}
+
+.palette-preview .palette-color-item.invalid .palette-color-hex {
+    color: #dc3545;
+}
+
+.palette-preview {
+    margin-top: 10px;
 }

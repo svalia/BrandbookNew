@@ -90,3 +90,11 @@ function setupDescriptionButtons(brandItem) {
         });
     }
 }
+
+// Модуль для работы с секциями бренда
+
+// Функция инициализации модуля секций
+function initSections() {
+    console.log('Sections module initialized');
+    // Все обработчики для секций инициализируются при рендеринге брендов
+}

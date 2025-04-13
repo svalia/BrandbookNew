@@ -206,6 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             setupAddPairedColorsButtons(brandItem);
+            setupAddPaletteButtons(brandItem);
         });
     }
 
@@ -530,6 +531,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Обновленная версия функции setupAddPairedColorsButtons - оставляем пустой,
     // так как настройку кнопок теперь выполняет colors.js
     function setupAddPairedColorsButtons(brandItem) {
+        // Пустая функция, так как настройка теперь происходит в colors.js
+    }
+
+    // Обновление для инициализации кнопок палитр
+    function setupAddPaletteButtons(brandItem) {
         // Пустая функция, так как настройка теперь происходит в colors.js
     }
 });
