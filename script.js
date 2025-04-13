@@ -281,11 +281,82 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const addLogoForm = document.getElementById("addLogoForm");
 
-    // Обработчик изменения цвета
-    const logoColorSelect = document.getElementById("logoColor");
-    const customColorField = document.getElementById("customColorField");
-    logoColorSelect.addEventListener("change", () => {
-        customColorField.style.display = logoColorSelect.value === "custom" ? "block" : "none";
+    addLogoForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const logoFile = document.getElementById("logoFile").files[0];
+        const logoColor = document.getElementById("logoColor").value;
+        const logoLanguage = document.getElementById("logoLanguage").value;
+        const logoType = document.getElementById("logoType").value;
+        const logoOrientation = document.getElementById("logoOrientation").value;
+        const iconWidth = document.getElementById("calculatedIconWidth").textContent;
+        const safeZone = document.getElementById("calculatedSafeZone").textContent;
+
+        if (!logoFile) {
+            alert("Выберите файл логотипа.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const logoData = {
+                id: Date.now(),
+                name: logoFile.name,
+                image: reader.result,
+                properties: {
+                    color: logoColor,
+                    language: logoLanguage,
+                    type: logoType,
+                    orientation: logoOrientation,
+                    iconWidth: `${iconWidth}%`,
+                    safeZone: `${safeZone}%`
+                }
+            };
+
+            // Находим галерею логотипов
+            const logosGallery = document.querySelector(".logos-gallery");
+            if (!logosGallery) {
+                console.error("Галерея логотипов не найдена.");
+                return;
+            }
+
+            // Создаём карточку логотипа
+            const logoCard = document.createElement("div");
+            logoCard.className = "logo-card";
+            logoCard.dataset.id = logoData.id;
+            logoCard.innerHTML = `
+                <img src="${logoData.image}" alt="${logoData.name}" class="logo-preview">
+                <div class="logo-details">
+                    <p><strong>Название:</strong> ${logoData.name}</p>
+                    <p><strong>Цвет:</strong> ${logoData.properties.color}</p>
+                    <p><strong>Язык:</strong> ${logoData.properties.language}</p>
+                    <p><strong>Тип:</strong> ${logoData.properties.type}</p>
+                    <p><strong>Ориентация:</strong> ${logoData.properties.orientation}</p>
+                    <p><strong>Половина ширины иконки:</strong> ${logoData.properties.iconWidth}</p>
+                    <p><strong>Охранное поле:</strong> ${logoData.properties.safeZone}</p>
+                </div>
+                <button class="delete-logo-btn">
+                    <img src="img_src/trash-icon.svg" alt="Удалить" class="delete-icon">
+                </button>
+            `;
+            logosGallery.appendChild(logoCard);
+
+            // Добавляем обработчик для удаления карточки
+            const deleteButton = logoCard.querySelector(".delete-logo-btn");
+            deleteButton.addEventListener("click", () => {
+                logoCard.remove();
+            });
+
+            // Сбрасываем форму
+            addLogoForm.reset();
+            document.getElementById("calculatedIconWidth").textContent = "0.000";
+            document.getElementById("calculatedSafeZone").textContent = "0.000";
+
+            // Закрываем модальное окно
+            const addLogoModal = bootstrap.Modal.getInstance(document.getElementById("addLogoModal"));
+            addLogoModal.hide();
+        };
+        reader.readAsDataURL(logoFile);
     });
 
     const logoWidthInput = document.getElementById("logoWidth");
@@ -326,58 +397,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Обработчик формы добавления логотипа
-    addLogoForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const logoFile = document.getElementById("logoFile").files[0];
-        const logoWidth = parseFloat(calculatedIconWidthElement.textContent);
-        const safeZone = parseFloat(calculatedSafeZoneElement.textContent);
-
-        if (!logoFile) {
-            alert("Выберите файл логотипа.");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            const logoData = {
-                id: Date.now(),
-                name: logoFile.name,
-                image: reader.result,
-                properties: {
-                    iconWidth: `${logoWidth}%`,
-                    safeZone: `${safeZone}%`,
-                }
-            };
-
-            // Добавляем логотип в галерею
-            const logosGallery = document.querySelector(".logos-gallery");
-            if (!logosGallery) {
-                console.error("Галерея логотипов не найдена.");
-                return;
-            }
-
-            const logoCard = document.createElement("div");
-            logoCard.className = "logo-card";
-            logoCard.innerHTML = `
-                <img src="${logoData.image}" alt="${logoData.name}" class="logo-preview">
-                <div class="logo-details">
-                    <p><strong>Название:</strong> ${logoData.name}</p>
-                    <p><strong>Половина ширины иконки:</strong> ${logoData.properties.iconWidth}</p>
-                    <p><strong>Охранное поле:</strong> ${logoData.properties.safeZone}</p>
-                </div>
-            `;
-            logosGallery.appendChild(logoCard);
-
-            // Сбрасываем форму
-            addLogoForm.reset();
-
-            // Закрываем модальное окно
-            const addLogoModal = bootstrap.Modal.getInstance(document.getElementById("addLogoModal"));
-            addLogoModal.hide();
-        };
-        reader.readAsDataURL(logoFile);
+    // Обработчик изменения цвета
+    const logoColorSelect = document.getElementById("logoColor");
+    const customColorField = document.getElementById("customColorField");
+    logoColorSelect.addEventListener("change", () => {
+        customColorField.style.display = logoColorSelect.value === "custom" ? "block" : "none";
     });
 
     const hintToggle = document.getElementById("hintToggle");
