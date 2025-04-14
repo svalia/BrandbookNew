@@ -222,7 +222,7 @@ function renderTypographySection() {
     return `
         <div class="typography-actions mt-3">
             <button class="btn btn-primary add-font-btn" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
-            <button class="btn btn-primary add-style-btn" data-bs-toggle="modal" data-bs-target="#addStyleModal">Добавить стиль</button>
+            <button class="btn btn-primary add-style-btn" data-bs-toggle="modal" data-bs-target="#addStyleModal">Добавить набор стилей</button>
         </div>
         <div class="typography-content mt-3">
             <div class="fonts-block" id="fontsBlock" style="display: none;">

@@ -1426,6 +1426,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 9px;
+    margin-left: 36px;
 }
 
 .download-font-btn, .delete-font-btn {
@@ -1441,26 +1442,15 @@ h1 {
     padding: 0;
 }
 
-.download-font-btn::before {
-    content: "";
-    position: absolute;
+.download-font-btn img, .delete-font-btn img {
     width: 16px;
-    height: 18px;
-    left: 4px;
-    top: 3px;
-    outline: 2px #1D953C solid;
-    outline-offset: -1px;
+    height: 16px;
 }
 
+/* Remove the previous ::before pseudo-elements */
+.download-font-btn::before,
 .delete-font-btn::before {
-    content: "";
-    position: absolute;
-    width: 16px;
-    height: 18px;
-    left: 4px;
-    top: 3px;
-    outline: 2px #FF590C solid;
-    outline-offset: -1px;
+    content: none;
 }
 
 /* Предпросмотр шрифта */
