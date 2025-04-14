@@ -158,6 +158,7 @@ function renderSections() {
                 ${section === "Цвета и цветовые стили" ? renderColorSection() : ""}
                 ${section === "Логотипы" ? renderLogoSection() : ""}
                 ${section === "Графические элементы" ? renderElementsSection() : ""}
+                ${section === "Типографика" ? renderTypographySection() : ""}
             </div>
         </li>
     `).join('');
@@ -211,6 +212,30 @@ function renderElementsSection() {
             <button class="btn btn-primary add-element-btn">Добавить</button>
             <div class="element-gallery mt-3">
                 <!-- Здесь будут отображаться добавленные элементы -->
+            </div>
+        </div>
+    `;
+}
+
+// Функция для рендеринга секции типографики
+function renderTypographySection() {
+    return `
+        <div class="typography-actions mt-3">
+            <button class="btn btn-primary add-font-btn" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
+            <button class="btn btn-primary add-style-btn" data-bs-toggle="modal" data-bs-target="#addStyleModal">Добавить стиль</button>
+        </div>
+        <div class="typography-content mt-3">
+            <div class="fonts-block" id="fontsBlock" style="display: none;">
+                <h3>Шрифты</h3>
+                <div class="fonts-gallery" id="fontsGallery">
+                    <!-- Шрифты будут добавляться здесь -->
+                </div>
+            </div>
+            <div class="styles-block" id="stylesBlock" style="display: none;">
+                <h3>Стили типографики</h3>
+                <div class="styles-gallery" id="stylesGallery">
+                    <!-- Стили типографики будут добавляться здесь -->
+                </div>
             </div>
         </div>
     `;
@@ -299,6 +324,9 @@ function setupBrandEvents(brandItem, brandId) {
             }
         });
     }
+    
+    // Настраиваем кнопки для типографики
+    setupTypographyButtons(brandItem);
 }
 
 // Настройка кнопок для работы с цветами
@@ -320,6 +348,35 @@ function setupColorButtons(brandItem) {
     }
     
     // Кнопки для парных цветов и палитр настраиваются в модуле colors.js
+}
+
+// Функция для настройки кнопок типографики
+function setupTypographyButtons(brandItem) {
+    // Кнопка добавления шрифта
+    const addFontButton = brandItem.querySelector('.add-font-btn');
+    if (addFontButton) {
+        addFontButton.addEventListener('click', function() {
+            const fontsBlock = brandItem.querySelector('#fontsBlock');
+            if (fontsBlock) {
+                fontsBlock.style.display = 'block';
+            }
+            
+            // Открытие модального окна для добавления шрифта будет происходить через data-bs-toggle
+        });
+    }
+    
+    // Кнопка добавления стиля
+    const addStyleButton = brandItem.querySelector('.add-style-btn');
+    if (addStyleButton) {
+        addStyleButton.addEventListener('click', function() {
+            const stylesBlock = brandItem.querySelector('#stylesBlock');
+            if (stylesBlock) {
+                stylesBlock.style.display = 'block';
+            }
+            
+            // Открытие модального окна для добавления стиля будет происходить через data-bs-toggle
+        });
+    }
 }
 
 // Функция для получения ID активного бренда
@@ -348,4 +405,5 @@ function getActiveBrandId() {
 
 // Экспортируем функции
 window.renderElementsSection = renderElementsSection;
+window.renderTypographySection = renderTypographySection;
 window.getActiveBrandId = getActiveBrandId;
