@@ -1459,3 +1459,106 @@ h1 {
     margin-top: 10px;
     margin-bottom: 5px;
 }
+
+/* Стили для наборов стилей типографики и стилей внутри них */
+.style-set-card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid rgba(175, 175, 175, 0.33);
+    margin-bottom: 20px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.style-set-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.style-set-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+    margin: 0;
+}
+
+.delete-style-set-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-style-set-btn img {
+    width: 16px;
+    height: 16px;
+}
+
+.style-set-content {
+    margin-bottom: 16px;
+    min-height: 40px;
+}
+
+.no-styles-message {
+    color: #6c757d;
+    font-style: italic;
+    margin: 0;
+    font-size: 14px;
+}
+
+.style-item {
+    background: #F6F8F9;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #E1E4E8;
+}
+
+.style-item-text {
+    font-family: 'SB Sans Display', sans-serif;
+    color: black;
+    word-wrap: break-word;
+}
+
+.delete-style-item-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    margin-left: 8px;
+}
+
+.delete-style-item-btn img {
+    width: 12px;
+    height: 12px;
+}
+
+.add-style-to-set-btn {
+    display: block;
+    width: 100%;
+}
+
+.style-preview {
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background: #F6F8F9;
+    border-radius: 8px;
+    border: 1px solid #E1E4E8;
+}
+
+.style-preview-text {
+    color: black;
+    font-family: 'SB Sans Display', sans-serif;
+    word-wrap: break-word;
+    width: 100%;
+}

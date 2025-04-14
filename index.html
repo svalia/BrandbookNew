@@ -376,9 +376,57 @@
                 </div>
                 <div class="modal-body">
                     <form id="addStyleForm">
-                        <!-- Здесь будет содержимое формы для добавления стиля -->
-                        <p>Форма для добавления стиля в разработке</p>
+                        <div class="mb-3">
+                            <label for="styleSetName" class="form-label">Название набора стилей шрифтов</label>
+                            <input type="text" class="form-control" id="styleSetName" placeholder="Введите название набора" required>
+                        </div>
                         <button type="submit" class="btn btn-primary w-100">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления стиля в набор -->
+    <div class="modal fade" id="addStyleToSetModal" tabindex="-1" aria-labelledby="addStyleToSetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addStyleToSetModalLabel">Добавить стиль в набор</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addStyleToSetForm">
+                        <input type="hidden" id="styleSetId">
+                        
+                        <div class="mb-3">
+                            <label for="styleFontSize" class="form-label">Размер кегля (px)</label>
+                            <input type="number" class="form-control" id="styleFontSize" min="8" max="200" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="styleLineHeight" class="form-label">Межстрочный интервал (px)</label>
+                            <input type="number" class="form-control" id="styleLineHeight" min="8" max="300" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="styleFontId" class="form-label">Шрифт</label>
+                            <select class="form-select" id="styleFontId" required>
+                                <option value="">Выберите шрифт</option>
+                                <!-- Шрифты будут добавлены динамически -->
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="mb-2">Превью</div>
+                            <div class="style-preview p-3 bg-light rounded border">
+                                <div class="style-preview-text">
+                                    <span id="previewStyleText">-/- · Стиль · - · - · -</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Добавить стиль</button>
                     </form>
                 </div>
             </div>
