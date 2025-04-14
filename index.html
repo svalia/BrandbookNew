@@ -254,6 +254,71 @@
         </div>
     </div>
 
+    <!-- Модальное окно для добавления графического элемента -->
+    <div class="modal fade" id="addGraphicElementModal" tabindex="-1" aria-labelledby="addGraphicElementModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGraphicElementModalLabel">Добавить графический элемент</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addGraphicElementForm">
+                        <div class="mb-3">
+                            <label for="elementType" class="form-label">Тип элемента</label>
+                            <select class="form-select" id="elementType" required>
+                                <option value="">Выберите тип элемента</option>
+                                <option value="Textures">Текстуры</option>
+                                <option value="Gradients">Градиенты</option>
+                                <option value="Key characters">Ключевые персонажи/элементы</option>
+                                <option value="Graphic elements">Графические элементы</option>
+                                <option value="Advertising materials">Рекламные материалы</option>
+                                <option value="Locators">Локаторы</option>
+                                <option value="Icons">Иконки</option>
+                                <option value="Illustrations">Иллюстрации</option>
+                                <option value="Other">Другое</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3" id="customTypeField" style="display: none;">
+                            <label for="customType" class="form-label">Название типа</label>
+                            <input type="text" class="form-control" id="customType" placeholder="Введите название типа элемента">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="elementFile" class="form-label">Выберите файл</label>
+                            <input type="file" class="form-control" id="elementFile" accept=".png,.svg" required>
+                            <small class="text-muted">Допустимые форматы: SVG, PNG</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="elementTags" class="form-label">Теги</label>
+                            <input type="text" class="form-control" id="elementTags" placeholder="Введите теги через запятую" required>
+                            <div class="alert alert-info mt-2">
+                                <strong>Важно!</strong> Протегируйте элемент на английском языке и таким образом, чтобы можено было по тегам выбирать датасеты для обучения модели генерировать персонажи, локаторы и прочее. Т.е. проставляйте теги осознанно.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="elementDescription" class="form-label">Описание элемента</label>
+                            <textarea class="form-control" id="elementDescription" rows="3" maxlength="500" placeholder="Где и как используется коротко в 500 символов"></textarea>
+                            <small class="text-muted"><span id="descriptionChars">0</span>/500 символов</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Предпросмотр</label>
+                            <div id="elementPreview" class="element-preview border rounded p-3 text-center">
+                                <p class="text-muted mb-0">Изображение будет показано здесь после выбора файла</p>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Добавить элемент</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     
@@ -261,6 +326,7 @@
     <script src="js/colors.js"></script>
     <script src="js/editor.js"></script>
     <script src="js/logos.js"></script>
+    <script src="js/elements.js"></script>
     <script src="js/sections.js"></script>
     <script src="js/brands.js"></script>
     <script src="js/main.js"></script>

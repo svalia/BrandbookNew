@@ -139,7 +139,7 @@ function renderSections() {
         "Логотипы", 
         "Цвета и цветовые стили", 
         "Типографика", 
-        "Текстуры, Градиенты, Ключевые персонажи/элементы, Графические элементы и Рекламные материалы"
+        "Графические элементы"
     ];
     
     return sections.map(section => `
@@ -157,6 +157,7 @@ function renderSections() {
                 </div>
                 ${section === "Цвета и цветовые стили" ? renderColorSection() : ""}
                 ${section === "Логотипы" ? renderLogoSection() : ""}
+                ${section === "Графические элементы" ? renderElementsSection() : ""}
             </div>
         </li>
     `).join('');
@@ -199,6 +200,18 @@ function renderLogoSection() {
         <button class="btn btn-success mt-3 add-logo-btn" data-bs-toggle="modal" data-bs-target="#addLogoModal">Добавить логотип</button>
         <div class="logos-gallery mt-4">
             <!-- Галерея логотипов будет динамически добавляться -->
+        </div>
+    `;
+}
+
+// Функция для рендеринга секции элементов
+function renderElementsSection() {
+    return `
+        <div class="mt-3">
+            <button class="btn btn-primary add-element-btn">Добавить</button>
+            <div class="element-gallery mt-3">
+                <!-- Здесь будут отображаться добавленные элементы -->
+            </div>
         </div>
     `;
 }
@@ -275,6 +288,17 @@ function setupBrandEvents(brandItem, brandId) {
     
     // Настраиваем кнопки управления цветами
     setupColorButtons(brandItem);
+
+    // Настраиваем кнопку добавления элементов
+    const addElementButton = brandItem.querySelector('.add-element-btn');
+    if (addElementButton) {
+        addElementButton.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('addGraphicElementModal'));
+            if (modal) {
+                modal.show();
+            }
+        });
+    }
 }
 
 // Настройка кнопок для работы с цветами
@@ -321,3 +345,7 @@ function getActiveBrandId() {
     
     return null;
 }
+
+// Экспортируем функции
+window.renderElementsSection = renderElementsSection;
+window.getActiveBrandId = getActiveBrandId;

@@ -1,4 +1,6 @@
-// Рендеринг секций бренда
+// Функции для работы с секциями брендов
+
+// Функция рендеринга секций бренда
 function renderSections() {
     const sections = [
         "Описание бренда", 
@@ -6,30 +8,48 @@ function renderSections() {
         "Логотипы", 
         "Цвета и цветовые стили", 
         "Типографика", 
-        "Текстуры, Градиенты, Ключевые персонажи/элементы, Графические элементы и Рекламные материалы"
+        "Текстуры, Градиенты, Ключ. персонажи/элементы, Граф. элементы и Рекламные материалы, Локаторы, Иконки, Иллюстрации и прочее"
     ];
-
-    return sections.map(section => `
-        <li class="list-group-item section-item">
-            <div class="section-header">
-                <div class="section-title">
-                    <span>${section}</span>
-                    <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+    
+    return sections.map((section, index) => {
+        // Создаем уникальный ID для каждой секции
+        const sectionId = `section-${index}`;
+        
+        return `
+            <li class="list-group-item section-item" id="${sectionId}">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>${section}</span>
+                        <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                    </div>
                 </div>
-            </div>
-            <div class="section-content" style="display: none;">
-                <div class="description-block">
-                    <div class="description-content"></div>
-                    <button class="add-description-btn btn btn-primary">Добавить описание</button>
+                <div class="section-content" style="display: none;">
+                    <div class="description-block">
+                        <div class="description-content"></div>
+                        <button class="add-description-btn btn btn-primary">Добавить описание</button>
+                    </div>
+                    ${section === "Цвета и цветовые стили" ? renderColorSection() : ""}
+                    ${section === "Логотипы" ? renderLogoSection() : ""}
+                    ${section.includes("Текстуры, Градиенты") ? renderElementsSection() : ""}
                 </div>
-                ${section === "Цвета и цветовые стили" ? renderColorSection() : ""}
-                ${section === "Логотипы" ? renderLogoSection() : ""}
-            </div>
-        </li>
-    `).join('');
+            </li>
+        `;
+    }).join('');
 }
 
-// Рендеринг секции цветов
+// Функция для рендеринга секции с элементами
+function renderElementsSection() {
+    return `
+        <div class="mt-3">
+            <button class="add-element-btn btn btn-primary">Добавить</button>
+            <div class="element-gallery mt-3">
+                <!-- Здесь будут отображаться добавленные элементы -->
+            </div>
+        </div>
+    `;
+}
+
+// Функция рендеринга секции с цветами
 function renderColorSection() {
     return `
         <div class="color-actions mt-3">
@@ -60,10 +80,10 @@ function renderColorSection() {
     `;
 }
 
-// Рендеринг секции логотипов
+// Функция рендеринга секции логотипов
 function renderLogoSection() {
     return `
-        <button class="btn btn-success mt-3 add-logo-btn" data-bs-toggle="modal" data-bs-target="#addLogoModal">Добавить логотип</button>
+        <button class="btn btn-primary mt-3 add-logo-btn" data-bs-toggle="modal" data-bs-target="#addLogoModal">Добавить логотип</button>
         <div class="logos-gallery mt-4">
             <!-- Галерея логотипов будет динамически добавляться -->
         </div>
@@ -98,3 +118,9 @@ function initSections() {
     console.log('Sections module initialized');
     // Все обработчики для секций инициализируются при рендеринге брендов
 }
+
+// Экспортируем функции для использования в других скриптах
+window.renderSections = renderSections;
+window.renderColorSection = renderColorSection;
+window.renderLogoSection = renderLogoSection;
+window.renderElementsSection = renderElementsSection;

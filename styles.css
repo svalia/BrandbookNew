@@ -1051,3 +1051,152 @@ h1 {
 .palette-preview {
     margin-top: 10px;
 }
+
+/* Стили для графических элементов */
+.element-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.element-card {
+    position: relative;
+    width: 200px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.element-preview {
+    width: 100%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    overflow: hidden;
+}
+
+.element-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.element-info {
+    padding: 10px;
+}
+
+.element-type {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.element-type.Textures { background-color: #4361EE; }
+.element-type.Gradients { background-color: #3A0CA3; }
+.element-type.Key-characters { background-color: #7209B7; }
+.element-type.Graphic-elements { background-color: #F72585; }
+.element-type.Advertising-materials { background-color: #4CC9F0; }
+.element-type.Locators { background-color: #4895EF; }
+.element-type.Icons { background-color: #560BAD; }
+.element-type.Illustrations { background-color: #B5179E; }
+.element-type.Other { background-color: #6C757D; }
+
+.element-tags {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.element-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.element-description-link {
+    font-size: 12px;
+    color: #1D953C;
+    text-decoration: underline;
+    cursor: help;
+}
+
+.delete-element-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.delete-element-btn:hover {
+    background: rgba(255, 255, 255, 1);
+}
+
+.delete-element-btn img {
+    width: 14px;
+    height: 14px;
+}
+
+/* Tooltip стили */
+.element-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.element-tooltip .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.element-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Стили для счетчика символов */
+.char-counter {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.char-counter.warning {
+    color: #fd7e14;
+}
+
+.char-counter.danger {
+    color: #dc3545;
+}
