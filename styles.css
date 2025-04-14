@@ -1562,3 +1562,49 @@ h1 {
     word-wrap: break-word;
     width: 100%;
 }
+
+/* Стили для инструкции */
+.instructions {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px 20px;
+    border: 1px solid rgba(175, 175, 175, 0.33);
+    font-size: 14px;
+    color: #4A4C4B;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.instructions h6 {
+    font-weight: 600;
+    color: #1D953C;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.instructions ol {
+    padding-left: 20px;
+    margin-bottom: 12px;
+}
+
+.instructions li {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+.instructions a {
+    color: #1D953C;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.instructions a:hover {
+    text-decoration: underline;
+}
+
+.important-note {
+    font-weight: 500;
+    color: #4A4C4B;
+    border-top: 1px solid #dee2e6;
+    padding-top: 10px;
+    font-size: 13px;
+}
