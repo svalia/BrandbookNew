@@ -1234,3 +1234,238 @@ h1 {
 .char-counter.danger {
     color: #dc3545;
 }
+
+/* Переопределение стилей кнопок Bootstrap */
+.btn-primary {
+    background-color: #1D953C !important;
+    border-color: #1D953C !important;
+    color: white;
+    padding: 6px 12px;
+    font-family: 'SB Sans Display', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.btn-primary:hover, 
+.btn-primary:active, 
+.btn-primary:focus {
+    background-color: #21A038 !important;
+    border-color: #21A038 !important;
+    color: white;
+}
+
+/* Переопределение синих стилей в Bootstrap */
+.btn-success {
+    background-color: #1D953C !important;
+    border-color: #1D953C !important;
+    color: white;
+    padding: 6px 12px;
+    font-family: 'SB Sans Display', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.btn-success:hover, 
+.btn-success:active, 
+.btn-success:focus {
+    background-color: #21A038 !important;
+    border-color: #21A038 !important;
+    color: white;
+}
+
+/* Применяем стили к кнопкам с Bootstrap классами внутри модальных окон */
+.modal .btn-primary,
+.modal .btn-success {
+    background-color: #1D953C !important;
+    border-color: #1D953C !important;
+}
+
+.modal .btn-primary:hover, 
+.modal .btn-primary:active, 
+.modal .btn-primary:focus,
+.modal .btn-success:hover, 
+.modal .btn-success:active, 
+.modal .btn-success:focus {
+    background-color: #21A038 !important;
+    border-color: #21A038 !important;
+}
+
+/* Для сохранения консистентности, обновляем также стили .btn-info и .btn-default */
+.btn-info,
+.btn-default {
+    background-color: #1D953C !important;
+    border-color: #1D953C !important;
+    color: white;
+    font-family: 'SB Sans Display', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.btn-info:hover,
+.btn-info:active,
+.btn-info:focus,
+.btn-default:hover,
+.btn-default:active,
+.btn-default:focus {
+    background-color: #21A038 !important;
+    border-color: #21A038 !important;
+    color: white;
+}
+
+/* Сохраняем стили для отрицательных действий */
+.btn-danger {
+    background-color: #1D953C;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #21A038;
+}
+.alert {
+    min-width: 600px !important;
+}
+
+/* Стили для типографики */
+.typography-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.typography-content {
+    margin-top: 20px;
+}
+
+.fonts-block, .styles-block {
+    margin-top: 20px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid rgba(175, 175, 175, 0.33);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fonts-block h3, .styles-block h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #212529;
+}
+
+.fonts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.font-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.font-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.font-name {
+    font-size: 18px;
+    line-height: 26px;
+}
+
+.font-type-regular {
+    font-weight: 400;
+}
+
+.font-type-thin {
+    font-weight: 100;
+}
+
+.font-type-light {
+    font-weight: 300;
+}
+
+.font-type-medium {
+    font-weight: 500;
+}
+
+.font-type-semibold {
+    font-weight: 600;
+}
+
+.font-type-bold {
+    font-weight: 700;
+}
+
+.font-type-heavy {
+    font-weight: 900;
+}
+
+.font-italic {
+    font-style: italic;
+}
+
+.font-tag {
+    font-size: 14px;
+    color: #4A4C4B;
+    line-height: 26px;
+}
+
+.font-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.download-font-btn, .delete-font-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.download-font-btn::before {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 18px;
+    left: 4px;
+    top: 3px;
+    outline: 2px #1D953C solid;
+    outline-offset: -1px;
+}
+
+.delete-font-btn::before {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 18px;
+    left: 4px;
+    top: 3px;
+    outline: 2px #FF590C solid;
+    outline-offset: -1px;
+}
+
+/* Предпросмотр шрифта */
+.font-preview-text {
+    font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}

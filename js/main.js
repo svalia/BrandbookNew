@@ -1,18 +1,28 @@
-let brands = []; // Массив для хранения данных о брендах
-
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOM полностью загружен и обработан");
+    console.log("DOM fully loaded and parsed"); 
 
-    // Инициализация UI элементов
-    initUI();
-
-    // Инициализация обработчиков событий для основных форм
-    initBrandForm();
-    initLogoForm();
-    initColorForms();
-
-    // Установка обработчиков событий для подсказок
-    setupHints();
+    // Инициализируем все модули
+    if (typeof initBrands === 'function') {
+        initBrands();
+    } else {
+        console.error('Function initBrands not found');
+    }
+    
+    if (typeof initColors === 'function') {
+        initColors();
+    }
+    
+    if (typeof initTypography === 'function') {
+        initTypography();
+    }
+    
+    if (typeof initLogos === 'function') {
+        initLogos();
+    }
+    
+    if (typeof initElements === 'function') {
+        initElements();
+    }
 });
 
 // Инициализация UI элементов
@@ -45,44 +55,3 @@ function setupHints() {
         });
     }
 }
-
-// Основной файл, инициализирующий приложение
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Main script loaded');
-    
-    // Инициализируем функциональность брендов
-    if (typeof initBrands === 'function') {
-        initBrands();
-    } else {
-        console.warn('Function initBrands not found');
-    }
-    
-    // Инициализируем работу с цветами
-    if (typeof initColors === 'function') {
-        initColors();
-    } else {
-        console.warn('Function initColors not found');
-    }
-    
-    // Инициализируем работу с редактором
-    if (typeof initEditor === 'function') {
-        initEditor();
-    } else {
-        console.warn('Function initEditor not found');
-    }
-    
-    // Инициализируем работу с логотипами
-    if (typeof initLogos === 'function') {
-        initLogos();
-    } else {
-        console.warn('Function initLogos not found');
-    }
-    
-    // Инициализируем работу с секциями
-    if (typeof initSections === 'function') {
-        initSections();
-    } else {
-        console.warn('Function initSections not found');
-    }
-});
