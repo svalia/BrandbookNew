@@ -407,3 +407,4 @@ function getActiveBrandId() {
 window.renderElementsSection = renderElementsSection;
 window.renderTypographySection = renderTypographySection;
 window.getActiveBrandId = getActiveBrandId;
+window.renderBrands = renderBrands; // Экспортируем функцию renderBrands для использования в json-utils.js
