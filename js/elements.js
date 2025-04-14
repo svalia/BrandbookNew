@@ -6,6 +6,9 @@ function initElements() {
     
     // Настройка модального окна
     setupGraphicElementModal();
+    
+    // Настройка тултипов
+    setupTooltips();
 }
 
 // Функция настройки модального окна
@@ -227,7 +230,7 @@ function createElementCard(element) {
             <div class="element-tags">
                 ${element.tags.map(tag => `<span class="element-tag">${tag}</span>`).join('')}
             </div>
-            <div class="element-tooltip">
+            <div class="element-tooltip dynamic-tooltip">
                 <span class="element-description-link">Посмотреть описание</span>
                 <span class="tooltip-text">${element.description || 'Без описания'}</span>
             </div>
@@ -256,6 +259,51 @@ function createElementCard(element) {
     }
     
     return card;
+}
+
+// Функция настройки тултипов
+function setupTooltips() {
+    document.addEventListener('mouseover', function(e) {
+        if (e.target && (e.target.classList.contains('element-description-link') || 
+            e.target.closest('.element-description-link'))) {
+            
+            const tooltip = e.target.closest('.element-tooltip').querySelector('.tooltip-text');
+            if (tooltip) {
+                // Get position of the link
+                const linkRect = e.target.getBoundingClientRect();
+                
+                // Calculate position for tooltip
+                const top = linkRect.top - tooltip.offsetHeight - 10;
+                const left = linkRect.left + (linkRect.width / 2);
+                
+                // Apply position
+                tooltip.style.top = `${top}px`;
+                tooltip.style.left = `${left}px`;
+                tooltip.style.transform = 'translateX(-50%)';
+                
+                // Make sure tooltip stays within viewport
+                setTimeout(() => {
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    
+                    // Check if tooltip is outside viewport horizontally
+                    if (tooltipRect.left < 10) {
+                        tooltip.style.left = '10px';
+                        tooltip.style.transform = 'none';
+                    } else if (tooltipRect.right > window.innerWidth - 10) {
+                        tooltip.style.left = 'auto';
+                        tooltip.style.right = '10px';
+                        tooltip.style.transform = 'none';
+                    }
+                    
+                    // Check if tooltip is outside viewport vertically
+                    if (tooltipRect.top < 10) {
+                        // Position below instead of above
+                        tooltip.style.top = `${linkRect.bottom + 10}px`;
+                    }
+                }, 0);
+            }
+        }
+    });
 }
 
 // Инициализация модуля при загрузке страницы
