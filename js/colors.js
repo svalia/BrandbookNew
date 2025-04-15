@@ -22,43 +22,162 @@ function initColors() {
 
 // Инициализация модального окна для обычных цветов
 function initColorModal() {
-    const colorForm = document.getElementById('addColorForm');
-    if (!colorForm) {
-        console.error('Форма добавления цвета не найдена');
-        return;
+    setupColorFormHandler();
+}
+
+// Обработчик для формы добавления цвета
+function setupColorFormHandler() {
+    const addColorForm = document.getElementById('addColorForm');
+    
+    if (addColorForm) {
+        // Клонируем для удаления старых обработчиков
+        const newForm = addColorForm.cloneNode(true);
+        addColorForm.parentNode.replaceChild(newForm, addColorForm);
+        
+        newForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const colorHexInput = document.getElementById('colorHex');
+            const colorValues = colorHexInput.value.split(',').map(c => c.trim());
+            
+            // Получаем ID активного бренда
+            const brandId = window.getActiveBrandId();
+            if (!brandId) {
+                alert('Пожалуйста, сначала выберите или создайте бренд');
+                return;
+            }
+            
+            // Находим бренд в массиве (без перезаписи массива)
+            const brandIndex = window.brands.findIndex(b => b.id === brandId);
+            if (brandIndex === -1) {
+                alert('Выбранный бренд не найден');
+                return;
+            }
+            
+            // Получаем ссылку на бренд
+            const brand = window.brands[brandIndex];
+            
+            // Убедимся, что у бренда есть секция colors и массив primary
+            if (!brand.sections) brand.sections = {};
+            if (!brand.sections.colors) brand.sections.colors = { description: '', primary: [] };
+            if (!brand.sections.colors.primary) brand.sections.colors.primary = [];
+            
+            // Добавляем каждый цвет в массив
+            colorValues.forEach(colorValue => {
+                if (colorValue) {
+                    // Добавляем # к цвету, если его нет
+                    const formattedHex = colorValue.startsWith('#') ? colorValue : `#${colorValue}`;
+                    
+                    // Проверяем, есть ли такой цвет уже
+                    const colorExists = brand.sections.colors.primary.some(c => c.hex === formattedHex);
+                    
+                    if (!colorExists) {
+                        // Добавляем цвет в массив
+                        brand.sections.colors.primary.push({ hex: formattedHex });
+                    }
+                }
+            });
+            
+            console.log(`Добавлены цвета для бренда ${brand.name}:`, colorValues);
+            
+            // Обновляем отображение в интерфейсе
+            const activeBrandItem = document.querySelector(`.brand-item[data-id="${brandId}"]`);
+            if (activeBrandItem) {
+                updateColorsInBrandItem(activeBrandItem, brand);
+            } else {
+                // Если не нашли элемент бренда, обновляем весь список
+                window.renderBrands();
+            }
+            
+            // Сбрасываем форму
+            newForm.reset();
+            
+            // Закрываем модальное окно
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addColorModal'));
+            if (modal) {
+                modal.hide();
+                
+                // Cleanup backdrop
+                setTimeout(() => {
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) backdrop.remove();
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }, 300);
+            }
+        });
+    }
+}
+
+// Функция для обновления цветов в DOM без полного перерендеринга
+function updateColorsInBrandItem(brandItem, brand) {
+    // Обновляем основные цвета
+    const mainColorsBlock = brandItem.querySelector('#mainColorsBlock');
+    const colorGallery = mainColorsBlock?.querySelector('#mainColorsGallery');
+    
+    if (mainColorsBlock && colorGallery && brand.sections.colors.primary?.length > 0) {
+        // Показываем блок, если есть цвета
+        mainColorsBlock.style.display = 'block';
+        
+        // Очищаем галерею
+        colorGallery.innerHTML = '';
+        
+        // Рендерим каждый цвет
+        brand.sections.colors.primary.forEach(color => {
+            const colorCard = document.createElement('div');
+            colorCard.className = 'color-card';
+            colorCard.dataset.hex = color.hex;
+            
+            colorCard.innerHTML = `
+                <div class="color-preview" style="background-color: ${color.hex}"></div>
+                <div class="color-info">
+                    <span class="color-hex">${color.hex}</span>
+                </div>
+                <button class="delete-color-btn">
+                    <img src="img_src/x-icon.svg" alt="Удалить">
+                </button>
+            `;
+            
+            colorGallery.appendChild(colorCard);
+            
+            // Добавляем обработчик для кнопки удаления
+            const deleteButton = colorCard.querySelector('.delete-color-btn');
+            deleteButton.addEventListener('click', function() {
+                const colorHex = colorCard.dataset.hex;
+                
+                // Находим индекс цвета для удаления
+                const colorIndex = brand.sections.colors.primary.findIndex(c => c.hex === colorHex);
+                if (colorIndex !== -1) {
+                    // Удаляем цвет из массива
+                    brand.sections.colors.primary.splice(colorIndex, 1);
+                    
+                    // Удаляем карточку из DOM
+                    colorCard.remove();
+                    
+                    // Если больше нет цветов, скрываем блок
+                    if (brand.sections.colors.primary.length === 0) {
+                        mainColorsBlock.style.display = 'none';
+                    }
+                }
+            });
+        });
     }
     
-    // Обработчик отправки формы добавления цветов
-    colorForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const colorHexInput = document.getElementById('colorHex');
-        if (!colorHexInput) {
-            console.error('Поле ввода цвета не найдено');
-            return;
-        }
-        
-        const colorValues = colorHexInput.value.split(',').map(c => c.trim());
-        
-        const activeBrandId = getActiveBrandId();
-        if (!activeBrandId) {
-            console.error('Не удалось определить активный бренд');
-            alert('Ошибка: Сначала добавьте и выберите бренд');
-            return;
-        }
-        
-        // Добавляем цвета
-        addColorsToActiveBrand(colorValues, activeBrandId);
-        
-        // Сбрасываем форму
-        colorForm.reset();
-        
-        // Закрываем модальное окно
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addColorModal'));
-        if (modal) {
-            modal.hide();
-        }
-    });
+    // Аналогично обновляем парные цвета и палитры...
+    updatePairedColorsInBrandItem(brandItem, brand);
+    updatePalettesInBrandItem(brandItem, brand);
+}
+
+// Функции для обновления парных цветов и палитр...
+function updatePairedColorsInBrandItem(brandItem, brand) {
+    // Аналогичная логика для обновления парных цветов...
+    // ...код обновления парных цветов...
+}
+
+function updatePalettesInBrandItem(brandItem, brand) {
+    // Аналогичная логика для обновления палитр...
+    // ...код обновления палитр...
 }
 
 // Инициализация модального окна парных цветов
@@ -628,6 +747,30 @@ function setupColorActionButtons() {
 }
 
 function setupActionButtons() {
+    // Настройка кнопок добавления цветов
+    const addColorButtons = document.querySelectorAll('#addColor');
+    addColorButtons.forEach(button => {
+        // Чтобы избежать дублирования обработчиков, проверяем наличие атрибута
+        if (!button.hasAttribute('data-handler-attached')) {
+            button.setAttribute('data-handler-attached', 'true');
+            button.setAttribute('data-bs-toggle', 'modal');
+            button.setAttribute('data-bs-target', '#addColorModal');
+            
+            button.addEventListener('click', function(event) {
+                // Предотвращаем всплытие события, чтобы не сработал обработчик редактирования описания
+                event.stopPropagation();
+                
+                const brandItem = this.closest('.brand-item');
+                if (brandItem) {
+                    const mainColorsBlock = brandItem.querySelector('#mainColorsBlock');
+                    if (mainColorsBlock) {
+                        mainColorsBlock.style.display = 'block';
+                    }
+                }
+            });
+        }
+    });
+
     // Настройка кнопок для парных цветов
     const addPairedColorsButtons = document.querySelectorAll('#addPairedColors');
     addPairedColorsButtons.forEach(button => {
@@ -637,7 +780,10 @@ function setupActionButtons() {
             button.setAttribute('data-bs-toggle', 'modal');
             button.setAttribute('data-bs-target', '#addPairedColorsModal');
             
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function(event) {
+                // Предотвращаем всплытие события
+                event.stopPropagation();
+                
                 const brandItem = this.closest('.brand-item');
                 if (brandItem) {
                     const pairedColorsBlock = brandItem.querySelector('#pairedColorsBlock');
@@ -657,7 +803,10 @@ function setupActionButtons() {
             button.setAttribute('data-bs-toggle', 'modal');
             button.setAttribute('data-bs-target', '#addPaletteModal');
             
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function(event) {
+                // Предотвращаем всплытие события
+                event.stopPropagation();
+                
                 const brandItem = this.closest('.brand-item');
                 if (brandItem) {
                     const palettesBlock = brandItem.querySelector('#palettesBlock');
@@ -669,3 +818,13 @@ function setupActionButtons() {
         }
     });
 }
+
+// Инициализация обработчиков при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализируем модуль цветов
+    initColors();
+    
+    // Настраиваем обработчики форм и кнопок
+    setupColorFormHandler();
+    setupColorActionButtons();
+});

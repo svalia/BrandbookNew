@@ -1,285 +1,232 @@
-// Модуль для работы с сохранением и загрузкой JSON
-
-// Идентификаторы элементов для логирования
+// Константы для идентификации событий
 const JSON_UTILS_IDS = {
-    SAVE_JSON: 'json-saveJson',
-    LOAD_JSON: 'json-loadJson',
-    PROCESS_DATA: 'json-processData',
-    ENSURE_SECTIONS: 'json-ensureSections',
-    SAVE_BUTTON: 'json-saveButton',
-    LOAD_BUTTON: 'json-loadButton',
-    FILE_INPUT: 'json-fileInput'
+    SAVE_BTN: 'saveJsonBtn',
+    LOAD_BTN: 'loadJsonBtn',
+    INPUT_FILE: 'jsonFileInput',
+    PROCESS_DATA: 'processLoadedData',
+    SAVE_DATA: 'saveJsonData'
 };
 
-// Функция для генерации имени файла для сохранения
-function generateJsonFilename() {
-    // Получаем список брендов
-    const brands = window.brands || [];
+// Инициализация модуля
+function initJsonUtils() {
+    console.log('JSON utils module initialized');
     
-    // Формируем часть имени из брендов
-    let brandsPart = 'brandbook';
-    if (brands.length > 0) {
-        brandsPart = brands.map(brand => brand.name.replace(/\s+/g, '_')).join('-');
-    }
+    // Находим кнопки и элементы управления
+    const saveJsonBtn = document.getElementById(JSON_UTILS_IDS.SAVE_BTN);
+    const loadJsonBtn = document.getElementById(JSON_UTILS_IDS.LOAD_BTN);
+    const jsonFileInput = document.getElementById(JSON_UTILS_IDS.INPUT_FILE);
     
-    // Получаем текущую дату и время
-    const now = new Date();
-    const datePart = [
-        now.getFullYear(),
-        String(now.getMonth() + 1).padStart(2, '0'),
-        String(now.getDate()).padStart(2, '0'),
-        String(now.getHours()).padStart(2, '0'),
-        String(now.getMinutes()).padStart(2, '0'),
-        String(now.getSeconds()).padStart(2, '0')
-    ].join('');
-    
-    // Формируем имя файла
-    return `${brandsPart}-${datePart}`;
-}
-
-// Функция для обеспечения наличия секций и описаний
-function ensureSectionsAndDescriptions() {
-    if (window.logAction) {
-        window.logAction(JSON_UTILS_IDS.ENSURE_SECTIONS, window.EVENT_TYPES?.INFO || 'info', 'Ensuring sections and descriptions');
-    }
-    
-    // Проверяем, есть ли данные для сохранения
-    if (!window.brands || window.brands.length === 0) {
+    if (!saveJsonBtn || !loadJsonBtn || !jsonFileInput) {
+        console.error('Не удалось найти необходимые элементы для работы с JSON');
         return;
     }
     
-    // Проходим по каждому бренду
-    window.brands.forEach(brand => {
-        // Проверяем, есть ли у бренда секции
-        if (!brand.sections) {
-            brand.sections = {};
-        }
+    // Устанавливаем флаг для отслеживания активной операции
+    let isOperationInProgress = false;
+
+    // Добавляем обработчики событий
+    saveJsonBtn.addEventListener('click', function(event) {
+        // Предотвращаем двойное срабатывание
+        event.preventDefault();
+        event.stopPropagation();
         
-        // Секции, которые должны быть у каждого бренда
-        const requiredSections = [
-            "brandDescription", 
-            "communicationTone", 
-            "logos", 
-            "colors", 
-            "typography", 
-            "elements"
-        ];
+        if (isOperationInProgress) return;
         
-        // Проверяем и создаем каждую секцию
-        requiredSections.forEach(sectionName => {
-            // Создаем секцию, если она отсутствует
-            if (!brand.sections[sectionName]) {
-                brand.sections[sectionName] = { 
-                    description: "" 
-                };
-            }
-            
-            // Добавляем поле description, если его нет
-            if (!brand.sections[sectionName].hasOwnProperty('description')) {
-                brand.sections[sectionName].description = "";
-            }
-            
-            // Собираем описания секций с DOM
-            const brandItem = document.querySelector(`.brand-item[data-id="${brand.id}"]`);
-            if (brandItem) {
-                const sectionItem = brandItem.querySelector(`.section-item[data-section="${sectionName}"]`);
-                if (sectionItem) {
-                    const descriptionContent = sectionItem.querySelector('.description-content');
-                    if (descriptionContent) {
-                        brand.sections[sectionName].description = descriptionContent.innerHTML;
-                    }
-                }
-            }
-            
-            // Инициализируем необходимые коллекции
-            switch (sectionName) {
-                case "logos":
-                    if (!brand.sections.logos.items) brand.sections.logos.items = [];
-                    break;
-                case "colors":
-                    if (!brand.sections.colors.primary) brand.sections.colors.primary = [];
-                    if (!brand.sections.colors.paired) brand.sections.colors.paired = [];
-                    if (!brand.sections.colors.palettes) brand.sections.colors.palettes = [];
-                    break;
-                case "typography":
-                    if (!brand.sections.typography.fonts) brand.sections.typography.fonts = [];
-                    if (!brand.sections.typography.styleSets) brand.sections.typography.styleSets = [];
-                    break;
-                case "elements":
-                    if (!brand.sections.elements.items) brand.sections.elements.items = [];
-                    break;
-            }
+        isOperationInProgress = true;
+        saveJsonData().finally(() => {
+            // Сбрасываем флаг после завершения операции
+            setTimeout(() => {
+                isOperationInProgress = false;
+            }, 500);
         });
     });
-}
-
-// Функция для сохранения данных в JSON
-function saveToJson() {
-    if (window.logAction) {
-        window.logAction(JSON_UTILS_IDS.SAVE_JSON, window.EVENT_TYPES?.INFO || 'info', 'Starting JSON save process');
-    }
     
-    // Проверяем, есть ли данные для сохранения
-    if (!window.brands || window.brands.length === 0) {
-        alert('Нет данных для сохранения. Добавьте хотя бы один бренд.');
-        if (window.logAction) {
-            window.logAction(JSON_UTILS_IDS.SAVE_JSON, window.EVENT_TYPES?.WARNING || 'warning', 'No brands to save');
-        }
-        return;
-    }
+    loadJsonBtn.addEventListener('click', function(event) {
+        // Предотвращаем двойное срабатывание
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (isOperationInProgress) return;
+        
+        isOperationInProgress = true;
+        
+        // Сбрасываем значение поля выбора файла для триггера события change даже при выборе того же файла
+        jsonFileInput.value = '';
+        jsonFileInput.click();
+    });
     
-    try {
-        // Собираем описания из DOM перед сохранением
-        ensureSectionsAndDescriptions();
-        
-        // Формируем объект для сохранения
-        const dataToSave = {
-            brands: window.brands
-        };
-        
-        if (window.logAction) {
-            window.logAction(JSON_UTILS_IDS.SAVE_JSON, window.EVENT_TYPES?.INFO || 'info', {
-                action: 'Data prepared for save',
-                brandCount: window.brands.length
-            });
+    jsonFileInput.addEventListener('change', function(event) {
+        if (this.files.length === 0) {
+            isOperationInProgress = false;
+            return;
         }
         
-        // Преобразуем в строку JSON
-        const jsonString = JSON.stringify(dataToSave, null, 2);
+        const file = this.files[0];
         
-        // Создаем Blob для сохранения
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        
-        // Генерируем имя файла
-        const filename = generateJsonFilename() + '.json';
-        
-        // Создаем ссылку для скачивания
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = filename;
-        
-        // Добавляем ссылку в документ и кликаем по ней
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        
-        // Удаляем ссылку
-        document.body.removeChild(downloadLink);
-        
-        if (window.logAction) {
-            window.logAction(JSON_UTILS_IDS.SAVE_JSON, window.EVENT_TYPES?.INFO || 'info', {
-                action: 'JSON file saved',
-                filename: filename,
-                size: (blob.size / 1024).toFixed(2) + ' KB'
-            });
-        }
-        
-        alert(`Данные успешно сохранены в файл "${filename}"`);
-    } catch (error) {
-        if (window.logAction) {
-            window.logAction(JSON_UTILS_IDS.SAVE_JSON, window.EVENT_TYPES?.ERROR || 'error', {
-                action: 'Error saving JSON',
-                error: error.message,
-                stack: error.stack
-            });
-        }
-        console.error('Ошибка при сохранении JSON:', error);
-        alert('Ошибка при сохранении данных. Пожалуйста, попробуйте снова.');
-    }
-}
-
-// Функция для загрузки данных из JSON
-function loadFromJson(file) {
-    if (window.logAction) {
-        window.logAction(JSON_UTILS_IDS.LOAD_JSON, window.EVENT_TYPES?.INFO || 'info', {
-            action: 'Loading JSON',
-            filename: file?.name,
-            size: file ? (file.size / 1024).toFixed(2) + ' KB' : 'unknown'
-        });
-    }
-    
-    return new Promise((resolve, reject) => {
-        if (!file) {
-            if (window.logAction) {
-                window.logAction(JSON_UTILS_IDS.LOAD_JSON, window.EVENT_TYPES?.WARNING || 'warning', 'No file selected');
-            }
-            reject('Файл не выбран');
+        if (!file.name.endsWith('.json')) {
+            alert('Выбран некорректный тип файла. Пожалуйста, выберите JSON файл.');
+            isOperationInProgress = false;
             return;
         }
         
         const reader = new FileReader();
-        
         reader.onload = function(e) {
             try {
-                const jsonData = JSON.parse(e.target.result);
-                if (window.logAction) {
-                    window.logAction(JSON_UTILS_IDS.LOAD_JSON, window.EVENT_TYPES?.INFO || 'info', {
-                        action: 'JSON parsed successfully',
-                        brandCount: jsonData?.brands?.length || 0
+                const data = JSON.parse(e.target.result);
+                processLoadedData(data)
+                    .finally(() => {
+                        // Сбрасываем флаг после завершения операции
+                        setTimeout(() => {
+                            isOperationInProgress = false;
+                        }, 500);
                     });
-                }
-                resolve(jsonData);
             } catch (error) {
-                if (window.logAction) {
-                    window.logAction(JSON_UTILS_IDS.LOAD_JSON, window.EVENT_TYPES?.ERROR || 'error', {
-                        action: 'Error parsing JSON',
-                        error: error.message
-                    });
-                }
-                console.error('Ошибка при парсинге JSON:', error);
-                reject('Ошибка при чтении файла. Проверьте формат JSON.');
+                console.error('Ошибка при чтении файла JSON:', error);
+                alert('Ошибка при чтении файла. Пожалуйста, проверьте формат файла.');
+                isOperationInProgress = false;
             }
         };
         
         reader.onerror = function() {
-            if (window.logAction) {
-                window.logAction(JSON_UTILS_IDS.LOAD_JSON, window.EVENT_TYPES?.ERROR || 'error', 'File reading error');
-            }
-            console.error('Ошибка чтения файла');
-            reject('Ошибка при чтении файла.');
+            console.error('Ошибка при чтении файла');
+            alert('Произошла ошибка при чтении файла.');
+            isOperationInProgress = false;
         };
         
         reader.readAsText(file);
     });
 }
 
-// Функция для обработки загруженных данных
-function processLoadedData(data) {
-    if (window.logAction) {
-        window.logAction(JSON_UTILS_IDS.PROCESS_DATA, window.EVENT_TYPES?.INFO || 'info', 'Processing loaded data');
-    }
-    
-    // Проверяем структуру загруженных данных
-    if (!data || !data.brands || !Array.isArray(data.brands)) {
-        alert('Некорректный формат загруженного файла. Отсутствуют данные о брендах.');
-        if (window.logAction) {
-            window.logAction(JSON_UTILS_IDS.PROCESS_DATA, window.EVENT_TYPES?.WARNING || 'warning', 'Invalid data format');
+// Функция для сохранения JSON
+async function saveJsonData() {
+    try {
+        if (!window.brands || !Array.isArray(window.brands) || window.brands.length === 0) {
+            alert('Нет данных для сохранения.');
+            return false;
         }
+        
+        // Создаем объект для сохранения
+        const dataToSave = {
+            brands: window.brands,
+            timestamp: Date.now(),
+            version: '1.0.0'
+        };
+        
+        // Преобразуем в JSON
+        const jsonString = JSON.stringify(dataToSave, null, 2);
+        
+        // Создаем объект Blob
+        const blob = new Blob([jsonString], {type: 'application/json'});
+        
+        // Создаем временную ссылку и инициируем скачивание
+        const now = new Date();
+        const fileName = `brandbook-${now.toISOString().slice(0, 10)}.json`;
+        
+        // Используем современный API File System Access API, если он доступен
+        if ('showSaveFilePicker' in window) {
+            try {
+                const opts = {
+                    types: [{
+                        description: 'JSON Files',
+                        accept: {'application/json': ['.json']}
+                    }],
+                    suggestedName: fileName
+                };
+                
+                const fileHandle = await window.showSaveFilePicker(opts);
+                const writable = await fileHandle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                
+                console.log('Data saved successfully using File System Access API');
+                return true;
+            } catch (err) {
+                // Если пользователь отменил выбор файла или API недоступен, используем fallback
+                console.warn('File System Access API недоступен или операция отменена, используем fallback', err);
+            }
+        }
+        
+        // Fallback для старых браузеров
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        
+        // Добавляем ссылку в DOM и имитируем клик
+        document.body.appendChild(link);
+        link.click();
+        
+        // Удаляем ссылку из DOM и освобождаем объект URL
+        setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            console.log('Data saved successfully using fallback method');
+        }, 100);
+        
+        return true;
+    } catch (error) {
+        console.error('Ошибка при сохранении JSON:', error);
+        alert('Произошла ошибка при сохранении файла.');
         return false;
     }
-    
+}
+
+// Функция для обработки загруженных данных
+async function processLoadedData(data) {
     try {
-        // Если текущие данные не пусты, спрашиваем о замене
+        // Проверяем структуру загруженных данных
+        if (!data || !data.brands || !Array.isArray(data.brands)) {
+            alert('Некорректный формат загруженного файла. Отсутствуют данные о брендах.');
+            return false;
+        }
+        
+        // Проверяем наличие функции renderBrands
+        if (typeof window.renderBrands !== 'function') {
+            console.error('Функция renderBrands не найдена');
+            alert('Ошибка: функция renderBrands не найдена. Проверьте консоль для дополнительных сведений.');
+            return false;
+        }
+        
+        // Если текущие данные не пусты, спрашиваем о замене или объединении
         if (window.brands && window.brands.length > 0) {
-            if (window.logAction) {
-                window.logAction(JSON_UTILS_IDS.PROCESS_DATA, window.EVENT_TYPES?.INFO || 'info', 'Existing brands found, asking for confirmation');
+            const action = confirm(
+                'Обнаружены существующие бренды. Выберите действие:\n\n' +
+                'OK - Заменить существующие данные\n' +
+                'Отмена - Объединить с существующими данными'
+            );
+            
+            if (action) {
+                // Пользователь выбрал "Заменить"
+                window.brands = data.brands;
+            } else {
+                // Пользователь выбрал "Объединить"
+                // Объединяем данные, избегая дубликатов по ID
+                const existingIds = new Set(window.brands.map(brand => brand.id));
+                
+                data.brands.forEach(newBrand => {
+                    if (!existingIds.has(newBrand.id)) {
+                        window.brands.push(newBrand);
+                        existingIds.add(newBrand.id);
+                    } else {
+                        // Если ID совпадают, автоматически обновляем существующий бренд
+                        const existingBrandIndex = window.brands.findIndex(b => b.id === newBrand.id);
+                        window.brands[existingBrandIndex] = newBrand;
+                    }
+                });
             }
-            const confirm = window.confirm('Загруженные данные заменят текущие. Продолжить?');
-            if (!confirm) {
-                if (window.logAction) {
-                    window.logAction(JSON_UTILS_IDS.PROCESS_DATA, window.EVENT_TYPES?.INFO || 'info', 'User cancelled data replacement');
-                }
-                return false;
-            }
+        } else {
+            // Если текущих данных нет, просто устанавливаем новые
+            window.brands = data.brands;
         }
         
         // Обеспечиваем наличие необходимых секций и описаний
-        if (window.logAction) {
-            window.logAction(JSON_UTILS_IDS.PROCESS_DATA, window.EVENT_TYPES?.INFO || 'info', 'Validating and fixing loaded data structure');
-        }
-        
-        data.brands.forEach(brand => {
-            if (!brand.sections) brand.sections = {};
+        for (let i = 0; i < window.brands.length; i++) {
+            const brand = window.brands[i];
             
+            if (!brand.sections) {
+                brand.sections = {};
+            }
+            
+            // Проверяем все необходимые секции
             const requiredSections = [
                 "brandDescription", 
                 "communicationTone", 
@@ -294,152 +241,58 @@ function processLoadedData(data) {
                     brand.sections[sectionName] = { description: "" };
                 }
                 
-                if (!brand.sections[sectionName].hasOwnProperty('description')) {
-                    brand.sections[sectionName].description = "";
+                // Дополнительные проверки для секций со сложной структурой
+                if (sectionName === "logos" && !brand.sections.logos.items) {
+                    brand.sections.logos.items = [];
+                } 
+                else if (sectionName === "colors") {
+                    if (!brand.sections.colors.primary) brand.sections.colors.primary = [];
+                    if (!brand.sections.colors.paired) brand.sections.colors.paired = [];
+                    if (!brand.sections.colors.palettes) brand.sections.colors.palettes = [];
+                } 
+                else if (sectionName === "typography") {
+                    if (!brand.sections.typography.fonts) brand.sections.typography.fonts = [];
+                    if (!brand.sections.typography.styleSets) brand.sections.typography.styleSets = [];
+                } 
+                else if (sectionName === "elements") {
+                    if (!brand.sections.elements.items) brand.sections.elements.items = [];
                 }
-                
-                switch (sectionName) {
-                    case "logos":
-                        if (!brand.sections.logos.items) brand.sections.logos.items = [];
-                        break;
-                    case "colors":
-                        if (!brand.sections.colors.primary) brand.sections.colors.primary = [];
-                        if (!brand.sections.colors.paired) brand.sections.colors.paired = [];
-                        if (!brand.sections.colors.palettes) brand.sections.colors.palettes = [];
-                        break;
-                    case "typography":
-                        if (!brand.sections.typography.fonts) brand.sections.typography.fonts = [];
-                        if (!brand.sections.typography.styleSets) brand.sections.typography.styleSets = [];
-                        break;
-                    case "elements":
-                        if (!brand.sections.elements.items) brand.sections.elements.items = [];
-                        break;
-                }
-            });
-        });
-        
-        // Обновляем глобальные данные
-        window.brands = data.brands;
-        
-        if (window.logAction) {
-            window.logAction(JSON_UTILS_IDS.PROCESS_DATA, window.EVENT_TYPES?.INFO || 'info', {
-                action: 'Data processed successfully',
-                brandCount: data.brands.length
             });
         }
         
-        // Перерендериваем интерфейс
-        if (typeof window.renderBrands === 'function') {
-            if (window.logAction) {
-                window.logAction(JSON_UTILS_IDS.PROCESS_DATA, window.EVENT_TYPES?.INFO || 'info', 'Rendering updated brands');
-            }
-            window.renderBrands();
-            
-            // После рендеринга разворачиваем первый бренд
-            setTimeout(() => {
-                const firstBrandItem = document.querySelector('.brand-item');
-                if (firstBrandItem) {
-                    const toggleSection = firstBrandItem.querySelector('.toggle-section');
-                    if (toggleSection) {
-                        if (window.logAction) {
-                            window.logAction('first-brand-toggle', window.EVENT_TYPES?.CLICK || 'click', 'Auto-expanding first brand');
-                        }
-                        toggleSection.click();
-                    }
+        // Рендерим бренды
+        window.renderBrands();
+        
+        // После рендеринга можно автоматически раскрыть первый бренд
+        setTimeout(() => {
+            const firstBrand = document.querySelector('.brand-item');
+            if (firstBrand) {
+                const toggleSection = firstBrand.querySelector('.toggle-section');
+                if (toggleSection) {
+                    toggleSection.click();
+                    
+                    // И раскрыть секции этого бренда
+                    setTimeout(() => {
+                        const sections = firstBrand.querySelectorAll('.section-header');
+                        sections.forEach(section => {
+                            section.click();
+                        });
+                    }, 200);
                 }
-            }, 100);
-        } else {
-            if (window.logAction) {
-                window.logAction('renderBrands', window.EVENT_TYPES?.ERROR || 'error', 'Function not found');
             }
-            console.error('Функция renderBrands не найдена');
-            alert('Ошибка при обновлении интерфейса. Пожалуйста, обновите страницу.');
-            return false;
-        }
+        }, 300);
         
         return true;
     } catch (error) {
-        if (window.logAction) {
-            window.logAction(JSON_UTILS_IDS.PROCESS_DATA, window.EVENT_TYPES?.ERROR || 'error', {
-                action: 'Error processing data',
-                error: error.message,
-                stack: error.stack
-            });
-        }
         console.error('Ошибка при обработке загруженных данных:', error);
-        alert('Ошибка при обработке загруженных данных.');
+        alert('Произошла ошибка при обработке файла: ' + error.message);
         return false;
     }
 }
 
-// Инициализация обработчиков событий для кнопок
-function initJsonUtils() {
-    const saveButton = document.getElementById('saveJsonBtn');
-    const loadButton = document.getElementById('loadJsonBtn');
-    const fileInput = document.getElementById('jsonFileInput');
-    
-    if (saveButton) {
-        saveButton.addEventListener('click', function() {
-            if (window.logAction) {
-                window.logAction('saveJsonBtn', window.EVENT_TYPES?.CLICK || 'click', 'Save button clicked');
-            }
-            saveToJson();
-        });
-    } else {
-        console.warn('Кнопка сохранения JSON не найдена');
-    }
-    
-    if (loadButton && fileInput) {
-        loadButton.addEventListener('click', function() {
-            if (window.logAction) {
-                window.logAction('loadJsonBtn', window.EVENT_TYPES?.CLICK || 'click', 'Load button clicked');
-            }
-            fileInput.click();
-        });
-        
-        fileInput.addEventListener('change', function(e) {
-            if (e.target.files && e.target.files[0]) {
-                if (window.logAction) {
-                    window.logAction('jsonFileInput', window.EVENT_TYPES?.CHANGE || 'change', {
-                        action: 'File selected',
-                        filename: e.target.files[0].name
-                    });
-                }
-                
-                loadFromJson(e.target.files[0])
-                    .then(data => {
-                        const success = processLoadedData(data);
-                        if (success) {
-                            if (window.logAction) {
-                                window.logAction(JSON_UTILS_IDS.LOAD_JSON, window.EVENT_TYPES?.INFO || 'info', 'Data loaded successfully');
-                            }
-                            alert('Данные успешно загружены');
-                        }
-                        // Сбрасываем значение для возможности выбора того же файла повторно
-                        fileInput.value = '';
-                    })
-                    .catch(error => {
-                        if (window.logAction) {
-                            window.logAction(JSON_UTILS_IDS.LOAD_JSON, window.EVENT_TYPES?.ERROR || 'error', {
-                                action: 'Error loading file',
-                                error: error
-                            });
-                        }
-                        alert(error);
-                        fileInput.value = '';
-                    });
-            }
-        });
-    } else {
-        console.warn('Кнопка загрузки JSON или элемент выбора файла не найдены');
-    }
-}
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', initJsonUtils);
-
-// Экспорт функций
-window.saveToJson = saveToJson;
-window.loadFromJson = loadFromJson;
+// Экспортируем функции в глобальный контекст
+window.saveJsonData = saveJsonData;
 window.processLoadedData = processLoadedData;
-window.ensureSectionsAndDescriptions = ensureSectionsAndDescriptions;
+
+// Инициализация модуля при загрузке документа
+document.addEventListener('DOMContentLoaded', initJsonUtils);

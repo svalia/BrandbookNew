@@ -88,161 +88,546 @@ function initBrands() {
     }
 }
 
-// Функция для отображения списка брендов
+// Функция для рендеринга списка брендов
 function renderBrands() {
-    const brandsList = document.getElementById('brandsList');
-    if (!brandsList) {
-        console.error('Контейнер брендов не найден');
-        return;
+    console.log("Начинаем рендеринг брендов:", window.brands);
+    
+    if (!window.brandsList) {
+        window.brandsList = document.getElementById('brandsList');
+        if (!window.brandsList) {
+            console.error("Элемент brandsList не найден");
+            return;
+        }
     }
     
-    console.log('Обновляем список брендов');
-    brandsList.innerHTML = '';
+    // Сохраняем состояние открытых секций и содержимое описаний перед рендерингом
+    const openBrands = [];
+    const openSections = {};
+    const sectionDescriptions = {};
     
-    if (!window.brands || window.brands.length === 0) {
-        console.log('Список брендов пуст');
+    // Находим все открытые бренды и их секции
+    document.querySelectorAll('.brand-item').forEach(brandItem => {
+        const brandId = brandItem.dataset.id;
+        const brandContent = brandItem.querySelector('.brand-sections-content');
+        
+        if (brandContent && brandContent.style.display === 'block') {
+            openBrands.push(brandId);
+            
+            // Сохраняем открытые секции этого бренда
+            const openSectionsInBrand = [];
+            brandItem.querySelectorAll('.section-item').forEach(sectionItem => {
+                const sectionType = sectionItem.dataset.section;
+                const sectionContent = sectionItem.querySelector('.section-content');
+                
+                if (sectionContent && sectionContent.style.display === 'block') {
+                    openSectionsInBrand.push(sectionType);
+                }
+                
+                // Сохраняем содержимое описаний
+                const descriptionContent = sectionItem.querySelector('.description-content');
+                if (descriptionContent) {
+                    sectionDescriptions[`${brandId}-${sectionType}`] = descriptionContent.innerHTML;
+                }
+            });
+            
+            openSections[brandId] = openSectionsInBrand;
+        }
+    });
+    
+    console.log("Сохраненные открытые бренды:", openBrands);
+    console.log("Сохраненные открытые секции:", openSections);
+    
+    // Очищаем содержимое контейнера
+    window.brandsList.innerHTML = "";
+    
+    if (!window.brands || !Array.isArray(window.brands) || window.brands.length === 0) {
+        console.log("Нет брендов для отображения");
         return;
     }
     
     window.brands.forEach((brand) => {
-        console.log(`Добавляем бренд в список: ${brand.name}`);
+        // Проверяем и инициализируем секции, если их нет
+        if (!brand.sections) brand.sections = {};
         
-        const brandItem = document.createElement('div');
-        brandItem.className = 'brand-item';
+        // Обязательные секции
+        const requiredSections = [
+            "brandDescription", 
+            "communicationTone", 
+            "logos", 
+            "colors", 
+            "typography", 
+            "elements"
+        ];
+        
+        // Проверяем и создаем секции только если их нет
+        requiredSections.forEach(section => {
+            if (!brand.sections[section]) {
+                brand.sections[section] = { description: "" };
+            }
+            
+            // Для секций с подэлементами
+            if (section === "logos") {
+                if (!brand.sections.logos.items) brand.sections.logos.items = [];
+            } else if (section === "colors") {
+                if (!brand.sections.colors.primary) brand.sections.colors.primary = [];
+                if (!brand.sections.colors.paired) brand.sections.colors.paired = [];
+                if (!brand.sections.colors.palettes) brand.sections.colors.palettes = [];
+            } else if (section === "typography") {
+                if (!brand.sections.typography.fonts) brand.sections.typography.fonts = [];
+                if (!brand.sections.typography.styleSets) brand.sections.typography.styleSets = [];
+            } else if (section === "elements") {
+                if (!brand.sections.elements.items) brand.sections.elements.items = [];
+            }
+        });
+        
+        const brandItem = document.createElement("div");
+        brandItem.className = "brand-item";
         brandItem.dataset.id = brand.id;
+        
+        // Создаем секцию бренда
         brandItem.innerHTML = `
             <div class="toggle-section" data-id="${brand.id}">
-                <div class="brand-name-container h3">
+                <div class="brand-name-container">
                     <span>${brand.name}</span>
                     <img src="img_src/chevron-down-green.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
                 </div>
-                <button class="btn btn-danger btn-sm" data-id="${brand.id}">Удалить</button>
+                <button type="button" class="btn btn-danger btn-sm delete-brand" data-id="${brand.id}">Удалить</button>
             </div>
             <div class="brand-sections-content">
                 <ul class="list-group">
-                    ${renderSections()}
+                    ${renderSections(brand)}
                 </ul>
             </div>
         `;
-        brandsList.appendChild(brandItem);
         
-        // Настраиваем обработчики событий для бренда
-        setupBrandEvents(brandItem, brand.id);
+        window.brandsList.appendChild(brandItem);
+        
+        // Восстанавливаем состояние раскрытых/свернутых секций
+        const isBrandOpen = openBrands.includes(brand.id.toString());
+        const brandContent = brandItem.querySelector(".brand-sections-content");
+        const toggleIcon = brandItem.querySelector(".toggle-section .section-toggle-icon");
+        
+        if (isBrandOpen && brandContent && toggleIcon) {
+            brandContent.style.display = "block";
+            toggleIcon.src = "img_src/chevron-up-green.svg";
+            
+            // Восстанавливаем открытые секции
+            const sectionsToOpen = openSections[brand.id] || [];
+            brandItem.querySelectorAll(".section-item").forEach(sectionItem => {
+                const sectionType = sectionItem.dataset.section;
+                if (sectionsToOpen.includes(sectionType)) {
+                    const sectionContent = sectionItem.querySelector(".section-content");
+                    const sectionIcon = sectionItem.querySelector(".section-toggle-icon");
+                    if (sectionContent) {
+                        sectionContent.style.display = "block";
+                        if (sectionIcon) {
+                            sectionIcon.src = "img_src/chevron-up-gray.svg";
+                        }
+                    }
+                }
+                
+                // Восстанавливаем описания
+                const descKey = `${brand.id}-${sectionType}`;
+                const savedDescription = sectionDescriptions[descKey];
+                if (savedDescription) {
+                    const descriptionContent = sectionItem.querySelector(".description-content");
+                    if (descriptionContent) {
+                        descriptionContent.innerHTML = savedDescription;
+                        
+                        // Также обновляем данные в объекте бренда
+                        if (brand.sections[sectionType]) {
+                            brand.sections[sectionType].description = savedDescription;
+                        }
+                        
+                        // Обновляем текст кнопки
+                        const addDescButton = sectionItem.querySelector(".add-description-btn");
+                        if (addDescButton) {
+                            addDescButton.textContent = savedDescription ? 'Редактировать описание' : 'Добавить описание';
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Добавляем обработчики для сворачивания/разворачивания секций бренда
+        setupSectionHandlers(brandItem, brand);
     });
+    
+    console.log("Рендеринг брендов завершен");
 }
 
 // Функция для рендеринга секций бренда
-function renderSections() {
+function renderSections(brand) {
+    if (!brand || !brand.sections) {
+        console.warn("Бренд или его секции отсутствуют");
+        return "";
+    }
+    
+    // Определяем все возможные секции
     const sections = [
-        "Описание бренда", 
-        "Тональность коммуникации", 
-        "Логотипы", 
-        "Цвета и цветовые стили", 
-        "Типографика", 
-        "Графические элементы"
+        { id: "brandDescription", name: "Описание бренда" },
+        { id: "communicationTone", name: "Тональность коммуникации" },
+        { id: "logos", name: "Логотипы" },
+        { id: "colors", name: "Цвета и цветовые стили" },
+        { id: "typography", name: "Типографика" },
+        { id: "elements", name: "Графические элементы" }
     ];
     
-    return sections.map(section => `
-        <li class="list-group-item section-item">
-            <div class="section-header">
-                <div class="section-title">
-                    <span>${section}</span>
-                    <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+    return sections.map(section => {
+        // Проверяем наличие секции и описания
+        const sectionData = brand.sections[section.id] || { description: "" };
+        const description = sectionData.description || "";
+        
+        // Создаем HTML для секции
+        return `
+            <li class="list-group-item section-item" data-section="${section.id}">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>${section.name}</span>
+                        <img src="img_src/chevron-down-gray.svg" alt="Chevron Down" class="section-toggle-icon" width="16" height="16">
+                    </div>
                 </div>
-            </div>
-            <div class="section-content" style="display: none;">
-                <div class="description-block">
-                    <div class="description-content"></div>
-                    <button class="add-description-btn btn btn-primary">Добавить описание</button>
+                <div class="section-content" style="display: none;">
+                    <div class="description-block">
+                        <div class="description-content formatted-description">${description}</div>
+                        <button class="add-description-btn btn btn-primary">
+                            ${description ? 'Редактировать описание' : 'Добавить описание'}
+                        </button>
+                    </div>
+                    ${section.id === "logos" ? renderLogoSection(brand) : ""}
+                    ${section.id === "colors" ? renderColorsSection(brand) : ""}
+                    ${section.id === "typography" ? renderTypographySection(brand) : ""}
+                    ${section.id === "elements" ? renderElementsSection(brand) : ""}
                 </div>
-                ${section === "Цвета и цветовые стили" ? renderColorSection() : ""}
-                ${section === "Логотипы" ? renderLogoSection() : ""}
-                ${section === "Графические элементы" ? renderElementsSection() : ""}
-                ${section === "Типографика" ? renderTypographySection() : ""}
-            </div>
-        </li>
-    `).join('');
+            </li>
+        `;
+    }).join('');
 }
 
-// Функция для рендеринга секции цветов
-function renderColorSection() {
-    return `
+// Функция для рендеринга раздела логотипов
+function renderLogoSection(brand) {
+    if (!brand || !brand.sections || !brand.sections.logos) {
+        return '';
+    }
+
+    let logosHTML = `
+        <div class="logo-actions mt-3">
+            <button class="add-description-btn btn btn-primary" id="addLogoBtn" data-bs-toggle="modal" data-bs-target="#addLogoModal">Добавить логотип</button>
+        </div>
+        <div class="logos-gallery">`;
+    
+    // Проверяем наличие массива логотипов и добавляем их в галерею
+    if (brand.sections.logos.items && brand.sections.logos.items.length > 0) {
+        brand.sections.logos.items.forEach(logo => {
+            logosHTML += `
+                <div class="logo-card" data-id="${logo.id}">
+                    <div class="logo-preview">
+                        <img src="${logo.image}" alt="Logo ${logo.id}" style="max-width: 100%; max-height: 120px;">
+                    </div>
+                    <span class="logo-filename">${logo.fileName}</span>
+                    <div class="logo-details">
+                        <strong>Цвет:</strong> ${logo.properties.color}<br>
+                        <strong>Язык:</strong> ${logo.properties.language}<br>
+                        <strong>Тип:</strong> ${logo.properties.type}<br>
+                        <strong>Ориентация:</strong> ${logo.properties.orientation}
+                    </div>
+                    <div class="logo-calculated-values">
+                        <small><strong>Размеры:</strong> ${logo.properties.width || 0}×${logo.properties.height || 0}px</small><br>
+                        <small><strong>Половина ширины иконки:</strong> ${logo.properties.calculatedIconWidth?.toFixed(3) || '0.000'}%</small><br>
+                        <small><strong>Охранное поле:</strong> ${logo.properties.calculatedSafeZone?.toFixed(3) || '0.000'}%</small>
+                    </div>
+                    <button class="delete-logo-btn" data-id="${logo.id}">
+                        <img src="img_src/trash-icon.svg" alt="Delete" class="delete-icon">
+                    </button>
+                </div>
+            `;
+        });
+    }
+    
+    logosHTML += '</div>';
+    return logosHTML;
+}
+
+// Функция для рендеринга раздела цветов
+function renderColorsSection(brand) {
+    if (!brand || !brand.sections || !brand.sections.colors) {
+        return '';
+    }
+
+    let colorsHTML = `
         <div class="color-actions mt-3">
-            <button class="add-description-btn btn btn-primary" id="addColor">Добавить цвет</button>
-            <button class="add-description-btn btn btn-primary" id="addPairedColors">Добавить парные цвета</button>
-            <button class="add-description-btn btn btn-primary" id="addPalette">Добавить палитру</button>
+            <button class="add-description-btn btn btn-primary" id="addColor" data-bs-toggle="modal" data-bs-target="#addColorModal">Добавить цвет</button>
+            <button class="add-description-btn btn btn-primary" id="addPairedColors" data-bs-toggle="modal" data-bs-target="#addPairedColorsModal">Добавить парные цвета</button>
+            <button class="add-description-btn btn btn-primary" id="addPalette" data-bs-toggle="modal" data-bs-target="#addPaletteModal">Добавить палитру</button>
         </div>
-        <div id="colorBlocks">
-            <div class="color-block" id="mainColorsBlock" style="display: none;">
-                <h3>Основные и дополнительные цвета</h3>
-                <div class="color-gallery" id="mainColorsGallery">
-                    <!-- Карточки цветов будут добавляться здесь -->
+        <div id="colorBlocks">`;
+    
+    // Основные цвета
+    colorsHTML += `
+        <div class="color-block" id="mainColorsBlock" ${brand.sections.colors.primary && brand.sections.colors.primary.length > 0 ? '' : 'style="display: none;"'}>
+            <h3>Основные и дополнительные цвета</h3>
+            <div class="color-gallery" id="mainColorsGallery">`;
+    
+    if (brand.sections.colors.primary && brand.sections.colors.primary.length > 0) {
+        brand.sections.colors.primary.forEach(color => {
+            colorsHTML += `
+                <div class="color-card" data-hex="${color.hex}">
+                    <div class="color-preview" style="background-color: ${color.hex}"></div>
+                    <div class="color-info">
+                        <span class="color-hex">${color.hex}</span>
+                    </div>
+                    <button class="delete-color-btn">
+                        <img src="img_src/x-icon.svg" alt="Удалить">
+                    </button>
                 </div>
-            </div>
-            <div class="color-block" id="pairedColorsBlock" style="display: none;">
-                <h3>Парные цвета</h3>
-                <div class="paired-colors-gallery" id="pairedColorsGallery">
-                    <!-- Карточки парных цветов будут добавляться здесь -->
+            `;
+        });
+    }
+    
+    colorsHTML += `</div></div>`;
+    
+    // Парные цвета
+    colorsHTML += `
+        <div class="color-block" id="pairedColorsBlock" ${brand.sections.colors.paired && brand.sections.colors.paired.length > 0 ? '' : 'style="display: none;"'}>
+            <h3>Парные цвета</h3>
+            <div class="paired-colors-gallery" id="pairedColorsGallery">`;
+    
+    if (brand.sections.colors.paired && brand.sections.colors.paired.length > 0) {
+        brand.sections.colors.paired.forEach(pair => {
+            colorsHTML += `
+                <div class="paired-color-card">
+                    <div class="paired-color-header">
+                        <div class="paired-color-item">
+                            <div>Цвет фона</div>
+                            <div class="paired-color-preview" style="background: ${pair.backgroundColor}"></div>
+                            <div>${pair.backgroundColor}</div>
+                        </div>
+                        <div class="paired-color-item">
+                            <div>Цвет текста</div>
+                            <div class="paired-color-preview" style="background: ${pair.textColor}"></div>
+                            <div>${pair.textColor}</div>
+                        </div>
+                    </div>
+                    <div class="paired-color-sample" style="background-color: ${pair.backgroundColor}; color: ${pair.textColor}">Sample text</div>
+                    <div class="paired-color-inversion">${pair.allowInversion ? "✅ инверсия допустима" : "❌ инверсия недопустима"}</div>
+                    ${pair.allowInversion ? `
+                    <div class="paired-color-inverted">
+                        <div class="paired-color-header">
+                            <div class="paired-color-item">
+                                <div>Цвет фона</div>
+                                <div class="paired-color-preview" style="background: ${pair.textColor}"></div>
+                                <div>${pair.textColor}</div>
+                            </div>
+                            <div class="paired-color-item">
+                                <div>Цвет текста</div>
+                                <div class="paired-color-preview" style="background: ${pair.backgroundColor}"></div>
+                                <div>${pair.backgroundColor}</div>
+                            </div>
+                        </div>
+                        <div class="paired-color-sample" style="background-color: ${pair.textColor}; color: ${pair.backgroundColor}">Sample text</div>
+                    </div>
+                    ` : ''}
+                    <button class="paired-color-delete">Удалить</button>
                 </div>
-            </div>
-            <div class="color-block" id="palettesBlock" style="display: none;">
-                <h3>Палитры цветов</h3>
-                <div class="palettes-gallery" id="palettesGallery">
-                    <!-- Карточки палитр будут добавляться здесь -->
+            `;
+        });
+    }
+    
+    colorsHTML += `</div></div>`;
+    
+    // Палитры цветов
+    colorsHTML += `
+        <div class="color-block" id="palettesBlock" ${brand.sections.colors.palettes && brand.sections.colors.palettes.length > 0 ? '' : 'style="display: none;"'}>
+            <h3>Палитры цветов</h3>
+            <div class="palettes-gallery" id="palettesGallery">`;
+    
+    if (brand.sections.colors.palettes && brand.sections.colors.palettes.length > 0) {
+        brand.sections.colors.palettes.forEach(palette => {
+            colorsHTML += `
+                <div class="palette-card" data-id="${palette.id}">
+                    ${palette.name ? `<div class="palette-name">${palette.name}</div>` : ''}
+                    <div class="palette-colors">`;
+            
+            palette.colors.forEach(color => {
+                colorsHTML += `
+                    <div class="palette-color-item">
+                        <div class="palette-color-circle" style="background-color: ${color}"></div>
+                        <div class="palette-color-hex">${color}</div>
+                    </div>
+                `;
+            });
+            
+            colorsHTML += `
+                    </div>
+                    <button class="delete-palette-btn">
+                        <img src="img_src/x-icon.svg" alt="Удалить" width="12" height="12">
+                    </button>
                 </div>
-            </div>
-        </div>
-    `;
+            `;
+        });
+    }
+    
+    colorsHTML += `</div></div>`;
+    
+    colorsHTML += '</div>'; // Закрываем colorBlocks
+    return colorsHTML;
 }
 
-// Функция для рендеринга секции логотипов
-function renderLogoSection() {
-    return `
-        <button class="btn btn-success mt-3 add-logo-btn" data-bs-toggle="modal" data-bs-target="#addLogoModal">Добавить логотип</button>
-        <div class="logos-gallery mt-4">
-            <!-- Галерея логотипов будет динамически добавляться -->
-        </div>
-    `;
-}
+// Функция для рендеринга раздела типографики
+function renderTypographySection(brand) {
+    if (!brand || !brand.sections || !brand.sections.typography) {
+        return '';
+    }
 
-// Функция для рендеринга секции элементов
-function renderElementsSection() {
-    return `
-        <div class="mt-3">
-            <button class="btn btn-primary add-element-btn">Добавить</button>
-            <div class="element-gallery mt-3">
-                <!-- Здесь будут отображаться добавленные элементы -->
-            </div>
-        </div>
-    `;
-}
-
-// Функция для рендеринга секции типографики
-function renderTypographySection() {
-    return `
+    let typographyHTML = `
         <div class="typography-actions mt-3">
-            <button class="btn btn-primary add-font-btn" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
-            <button class="btn btn-primary add-style-btn" data-bs-toggle="modal" data-bs-target="#addStyleModal">Добавить набор стилей</button>
+            <button class="add-description-btn btn btn-primary" id="addFont" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
+            <button class="add-description-btn btn btn-primary" id="addStyleSet" data-bs-toggle="modal" data-bs-target="#addStyleSetModal">Добавить набор стилей</button>
         </div>
-        <div class="typography-content mt-3">
-            <div class="fonts-block" id="fontsBlock" style="display: none;">
-                <h3>Шрифты</h3>
-                <div class="fonts-gallery" id="fontsGallery">
-                    <!-- Шрифты будут добавляться здесь -->
+        <div id="typographyContent">`;
+    
+    // Шрифты
+    typographyHTML += `
+        <div class="typography-section" id="fontsBlock" ${brand.sections.typography.fonts && brand.sections.typography.fonts.length > 0 ? '' : 'style="display: none;"'}>
+            <h3>Шрифты</h3>
+            <div class="fonts-gallery" id="fontsGallery">`;
+    
+    if (brand.sections.typography.fonts && brand.sections.typography.fonts.length > 0) {
+        brand.sections.typography.fonts.forEach(font => {
+            typographyHTML += `
+                <div class="font-card" data-id="${font.id}">
+                    <div class="font-info">
+                        <h4>${font.family} ${font.type}${font.isItalic ? ' Italic' : ''}</h4>
+                        <style>
+                            @font-face {
+                                font-family: '${font.family}-${font.id}';
+                                src: url('${font.base64}') format('woff');
+                                font-weight: ${font.type === 'Bold' ? 'bold' : 'normal'};
+                                font-style: ${font.isItalic ? 'italic' : 'normal'};
+                            }
+                        </style>
+                        <div class="font-preview" style="font-family: '${font.family}-${font.id}'">
+                            Съешь ещё этих мягких французских булок, да выпей чаю.<br>
+                            АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ<br>
+                            абвгдеёжзийклмнопрстуфхцчшщъыьэюя<br>
+                            1234567890!@#$%^&*()_+
+                        </div>
+                        <div class="font-filename">${font.fileName || 'Без имени файла'}</div>
+                    </div>
+                    <button class="delete-font-btn" data-id="${font.id}">
+                        <img src="img_src/trash-icon.svg" alt="Delete" class="delete-icon">
+                    </button>
                 </div>
-            </div>
-            <div class="styles-block" id="stylesBlock" style="display: none;">
-                <h3>Стили типографики</h3>
-                <div class="styles-gallery" id="stylesGallery">
-                    <!-- Стили типографики будут добавляться здесь -->
+            `;
+        });
+    }
+    
+    typographyHTML += `</div></div>`;
+    
+    // Наборы стилей
+    typographyHTML += `
+        <div class="typography-section" id="styleSetsBlock" ${brand.sections.typography.styleSets && brand.sections.typography.styleSets.length > 0 ? '' : 'style="display: none;"'}>
+            <h3>Наборы стилей</h3>
+            <div class="style-sets-gallery" id="styleSetsGallery">`;
+    
+    if (brand.sections.typography.styleSets && brand.sections.typography.styleSets.length > 0) {
+        brand.sections.typography.styleSets.forEach(styleSet => {
+            typographyHTML += `
+                <div class="style-set-card" data-id="${styleSet.id}">
+                    <h4>${styleSet.name}</h4>
+                    <div class="style-set-styles">`;
+            
+            if (styleSet.styles && styleSet.styles.length > 0) {
+                styleSet.styles.forEach(style => {
+                    // Найдем шрифт для этого стиля
+                    const font = brand.sections.typography.fonts.find(f => f.id === style.fontId);
+                    let fontFaceRule = '';
+                    
+                    if (font) {
+                        fontFaceRule = `
+                            @font-face {
+                                font-family: '${font.family}-${font.id}';
+                                src: url('${font.base64}') format('woff');
+                                font-weight: ${font.type === 'Bold' ? 'bold' : 'normal'};
+                                font-style: ${font.isItalic ? 'italic' : 'normal'};
+                            }
+                        `;
+                    }
+                    
+                    typographyHTML += `
+                        <div class="style-item" data-id="${style.id}">
+                            <style>${fontFaceRule}</style>
+                            <div class="style-preview" style="
+                                font-family: '${font ? font.family + '-' + font.id : 'sans-serif'}';
+                                font-size: ${style.fontSize}px;
+                                line-height: ${style.lineHeight}px;
+                                ${style.isItalic ? 'font-style: italic;' : ''}
+                            ">
+                                Пример текста
+                            </div>
+                            <div class="style-info">
+                                <span>${font ? font.family + ' ' + font.type : 'Шрифт не найден'}, ${style.fontSize}px/${style.lineHeight}px</span>
+                                <button class="delete-style-btn" data-id="${style.id}">Удалить</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            typographyHTML += `
+                    </div>
+                    <div class="style-set-actions">
+                        <button class="add-style-to-set-btn btn btn-sm btn-primary" data-set-id="${styleSet.id}" data-bs-toggle="modal" data-bs-target="#addStyleToSetModal">Добавить стиль</button>
+                        <button class="delete-style-set-btn btn btn-sm btn-danger" data-id="${styleSet.id}">Удалить набор</button>
+                    </div>
                 </div>
-            </div>
-        </div>
-    `;
+            `;
+        });
+    }
+    
+    typographyHTML += `</div></div>`;
+    
+    typographyHTML += '</div>'; // Закрываем typographyContent
+    return typographyHTML;
 }
 
-// Настройка обработчиков событий для бренда
-function setupBrandEvents(brandItem, brandId) {
+// Функция для рендеринга раздела графических элементов
+function renderElementsSection(brand) {
+    if (!brand || !brand.sections || !brand.sections.elements) {
+        return '';
+    }
+
+    let elementsHTML = `
+        <div class="elements-actions mt-3">
+            <button class="add-description-btn btn btn-primary" id="addElementBtn" data-bs-toggle="modal" data-bs-target="#addElementModal">Добавить элемент</button>
+        </div>
+        <div class="elements-gallery">`;
+    
+    if (brand.sections.elements.items && brand.sections.elements.items.length > 0) {
+        brand.sections.elements.items.forEach(element => {
+            elementsHTML += `
+                <div class="element-card" data-id="${element.id}">
+                    <div class="element-preview">
+                        <img src="${element.image}" alt="Element ${element.id}" style="max-width: 100%; max-height: 200px;">
+                    </div>
+                    <div class="element-info">
+                        <h4>${element.name}</h4>
+                        <div class="element-description">${element.description || ''}</div>
+                    </div>
+                    <button class="delete-element-btn" data-id="${element.id}">
+                        <img src="img_src/trash-icon.svg" alt="Delete" class="delete-icon">
+                    </button>
+                </div>
+            `;
+        });
+    }
+    
+    elementsHTML += '</div>';
+    return elementsHTML;
+}
+
+// Функция настройки обработчиков для секций
+function setupSectionHandlers(brandItem, brand) {
     // Обработчик сворачивания/разворачивания бренда
     const toggleSection = brandItem.querySelector('.toggle-section');
     const brandContent = brandItem.querySelector('.brand-sections-content');
@@ -262,10 +647,11 @@ function setupBrandEvents(brandItem, brandId) {
     }
     
     // Обработчик удаления бренда
-    const deleteButton = brandItem.querySelector('.btn-danger');
+    const deleteButton = brandItem.querySelector('.delete-brand');
     if (deleteButton) {
         deleteButton.addEventListener('click', function() {
-            window.brands = window.brands.filter((brand) => brand.id !== brandId);
+            const brandId = parseInt(this.dataset.id);
+            window.brands = window.brands.filter(b => b.id !== brandId);
             renderBrands();
         });
     }
@@ -281,7 +667,6 @@ function setupBrandEvents(brandItem, brandId) {
             sectionHeader.addEventListener('click', () => {
                 const isVisible = sectionContent.style.display === 'block';
                 sectionContent.style.display = isVisible ? 'none' : 'block';
-                
                 if (sectionIcon) {
                     sectionIcon.src = isVisible ? 
                         'img_src/chevron-down-gray.svg' : 
@@ -291,91 +676,202 @@ function setupBrandEvents(brandItem, brandId) {
         }
     });
     
-    // Добавляем обработчик для кнопки "Добавить описание"
-    const addDescriptionButtons = brandItem.querySelectorAll('.add-description-btn');
+    // Настройка кнопок добавления описания
+    const addDescriptionButtons = brandItem.querySelectorAll(".add-description-btn");
     if (addDescriptionButtons && addDescriptionButtons.length > 0) {
-        addDescriptionButtons.forEach((button) => {
-            if (button && !button.id) { // Только для кнопок без ID (не цветовые кнопки)
-                button.addEventListener('click', (e) => {
-                    const descriptionBlock = e.target.closest('.description-block');
-                    if (descriptionBlock) {
-                        const descriptionContent = descriptionBlock.querySelector('.description-content');
-                        if (descriptionContent && typeof openEditor === 'function') {
-                            openEditor(descriptionContent);
-                        } else {
-                            console.warn('Не удалось найти элемент description-content или функцию openEditor');
-                        }
+        addDescriptionButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                // Проверяем, не является ли кнопка одной из кнопок действий с цветами
+                if (button.id === 'addColor' || button.id === 'addPairedColors' || button.id === 'addPalette' || 
+                    button.id === 'addLogoBtn' || button.id === 'addFont' || button.id === 'addStyleSet' || 
+                    button.id === 'addElementBtn') {
+                    // Если это кнопка действий, не открываем редактор описания
+                    return;
+                }
+
+                const descriptionBlock = button.closest(".description-block");
+                // Добавляем проверку на существование descriptionBlock
+                if (descriptionBlock) {
+                    const descriptionContent = descriptionBlock.querySelector(".description-content");
+                    
+                    if (descriptionContent && window.openEditor) {
+                        window.openEditor(descriptionContent, (newContent) => {
+                            // Определяем тип секции
+                            const sectionItem = button.closest(".section-item");
+                            const sectionType = sectionItem ? sectionItem.dataset.section : null;
+                            
+                            // Сохраняем описание в данные бренда
+                            if (sectionType && brand.sections && brand.sections[sectionType]) {
+                                console.log(`Сохраняем описание для секции ${sectionType}:`, newContent);
+                                brand.sections[sectionType].description = newContent;
+                                
+                                // Обновляем текст кнопки
+                                button.textContent = newContent ? 'Редактировать описание' : 'Добавить описание';
+                            }
+                        });
                     }
-                });
-            }
+                } else {
+                    console.log("Блок описания не найден для кнопки:", button);
+                }
+            });
         });
     }
     
-    // Настраиваем кнопки управления цветами
-    setupColorButtons(brandItem);
-
-    // Настраиваем кнопку добавления элементов
-    const addElementButton = brandItem.querySelector('.add-element-btn');
-    if (addElementButton) {
-        addElementButton.addEventListener('click', function() {
-            const modal = new bootstrap.Modal(document.getElementById('addGraphicElementModal'));
-            if (modal) {
-                modal.show();
-            }
-        });
-    }
-    
-    // Настраиваем кнопки для типографики
-    setupTypographyButtons(brandItem);
+    // Добавляем обработчики для загруженных элементов
+    setupLoadedElementsHandlers(brandItem, brand);
 }
 
-// Настройка кнопок для работы с цветами
-function setupColorButtons(brandItem) {
-    // Кнопка добавления основного цвета
-    const addColorButton = brandItem.querySelector('#addColor');
-    if (addColorButton) {
-        addColorButton.addEventListener('click', function() {
-            const mainColorsBlock = brandItem.querySelector('#mainColorsBlock');
-            if (mainColorsBlock) {
-                mainColorsBlock.style.display = 'block';
-            }
+// Функция для настройки обработчиков загруженных элементов
+function setupLoadedElementsHandlers(brandItem, brand) {
+    // Логотипы
+    const deleteLogoBtns = brandItem.querySelectorAll('.delete-logo-btn');
+    deleteLogoBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const logoId = parseInt(this.getAttribute('data-id'), 10);
+            const logoIndex = brand.sections.logos.items.findIndex(logo => logo.id === logoId);
             
-            const addColorModal = new bootstrap.Modal(document.getElementById('addColorModal'));
-            if (addColorModal) {
-                addColorModal.show();
+            if (logoIndex !== -1) {
+                brand.sections.logos.items.splice(logoIndex, 1);
+                this.closest('.logo-card').remove();
+                
+                if (brand.sections.logos.items.length === 0) {
+                    brandItem.querySelector('.logos-gallery').innerHTML = '';
+                }
             }
         });
-    }
-    
-    // Кнопки для парных цветов и палитр настраиваются в модуле colors.js
-}
+    });
 
-// Функция для настройки кнопок типографики
-function setupTypographyButtons(brandItem) {
-    // Кнопка добавления шрифта
-    const addFontButton = brandItem.querySelector('.add-font-btn');
-    if (addFontButton) {
-        addFontButton.addEventListener('click', function() {
-            const fontsBlock = brandItem.querySelector('#fontsBlock');
-            if (fontsBlock) {
-                fontsBlock.style.display = 'block';
-            }
+    // Цвета
+    const deleteColorBtns = brandItem.querySelectorAll('.delete-color-btn');
+    deleteColorBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const colorHex = this.closest('.color-card').getAttribute('data-hex');
+            const colorIndex = brand.sections.colors.primary.findIndex(color => color.hex === colorHex);
             
-            // Открытие модального окна для добавления шрифта будет происходить через data-bs-toggle
+            if (colorIndex !== -1) {
+                brand.sections.colors.primary.splice(colorIndex, 1);
+                this.closest('.color-card').remove();
+                
+                if (brand.sections.colors.primary.length === 0) {
+                    brandItem.querySelector('#mainColorsBlock').style.display = 'none';
+                }
+            }
         });
-    }
+    });
+
+    // Парные цвета
+    const deletePairedColorBtns = brandItem.querySelectorAll('.paired-color-delete');
+    deletePairedColorBtns.forEach((btn, index) => {
+        btn.addEventListener('click', function() {
+            if (brand.sections.colors.paired && brand.sections.colors.paired.length > index) {
+                brand.sections.colors.paired.splice(index, 1);
+                this.closest('.paired-color-card').remove();
+                
+                if (brand.sections.colors.paired.length === 0) {
+                    brandItem.querySelector('#pairedColorsBlock').style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Палитры
+    const deletePaletteBtns = brandItem.querySelectorAll('.delete-palette-btn');
+    deletePaletteBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const paletteId = parseInt(this.closest('.palette-card').getAttribute('data-id'), 10);
+            const paletteIndex = brand.sections.colors.palettes.findIndex(palette => palette.id === paletteId);
+            
+            if (paletteIndex !== -1) {
+                brand.sections.colors.palettes.splice(paletteIndex, 1);
+                this.closest('.palette-card').remove();
+                
+                if (brand.sections.colors.palettes.length === 0) {
+                    brandItem.querySelector('#palettesBlock').style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Шрифты
+    const deleteFontBtns = brandItem.querySelectorAll('.delete-font-btn');
+    deleteFontBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const fontId = parseInt(this.getAttribute('data-id'), 10);
+            const fontIndex = brand.sections.typography.fonts.findIndex(font => font.id === fontId);
+            
+            if (fontIndex !== -1) {
+                brand.sections.typography.fonts.splice(fontIndex, 1);
+                this.closest('.font-card').remove();
+                
+                if (brand.sections.typography.fonts.length === 0) {
+                    brandItem.querySelector('#fontsBlock').style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Наборы стилей и стили в наборах
+    const deleteStyleSetBtns = brandItem.querySelectorAll('.delete-style-set-btn');
+    deleteStyleSetBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const setId = parseInt(this.getAttribute('data-id'), 10);
+            const setIndex = brand.sections.typography.styleSets.findIndex(set => set.id === setId);
+            
+            if (setIndex !== -1) {
+                brand.sections.typography.styleSets.splice(setIndex, 1);
+                this.closest('.style-set-card').remove();
+                
+                if (brand.sections.typography.styleSets.length === 0) {
+                    brandItem.querySelector('#styleSetsBlock').style.display = 'none';
+                }
+            }
+        });
+    });
+
+    const deleteStyleBtns = brandItem.querySelectorAll('.delete-style-btn');
+    deleteStyleBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const styleId = parseInt(this.getAttribute('data-id'), 10);
+            const setId = parseInt(this.closest('.style-set-card').getAttribute('data-id'), 10);
+            
+            const setIndex = brand.sections.typography.styleSets.findIndex(set => set.id === setId);
+            if (setIndex !== -1) {
+                const styleIndex = brand.sections.typography.styleSets[setIndex].styles.findIndex(style => style.id === styleId);
+                if (styleIndex !== -1) {
+                    brand.sections.typography.styleSets[setIndex].styles.splice(styleIndex, 1);
+                    this.closest('.style-item').remove();
+                }
+            }
+        });
+    });
+
+    // Кнопки добавления стиля в набор
+    const addStyleToSetBtns = brandItem.querySelectorAll('.add-style-to-set-btn');
+    addStyleToSetBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const setId = parseInt(this.getAttribute('data-set-id'), 10);
+            // Сохраняем ID набора в глобальную переменную для использования в модальном окне
+            window.currentStyleSetId = setId;
+        });
+    });
+
+    // Графические элементы
+    const deleteElementBtns = brandItem.querySelectorAll('.delete-element-btn');
+    deleteElementBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const elementId = parseInt(this.getAttribute('data-id'), 10);
+            const elementIndex = brand.sections.elements.items.findIndex(element => element.id === elementId);
+            
+            if (elementIndex !== -1) {
+                brand.sections.elements.items.splice(elementIndex, 1);
+                this.closest('.element-card').remove();
+            }
+        });
+    });
     
-    // Кнопка добавления стиля
-    const addStyleButton = brandItem.querySelector('.add-style-btn');
-    if (addStyleButton) {
-        addStyleButton.addEventListener('click', function() {
-            const stylesBlock = brandItem.querySelector('#stylesBlock');
-            if (stylesBlock) {
-                stylesBlock.style.display = 'block';
-            }
-            
-            // Открытие модального окна для добавления стиля будет происходить через data-bs-toggle
-        });
+    // Настраиваем кнопки действий с цветами
+    if (typeof window.setupActionButtons === 'function') {
+        window.setupActionButtons();
     }
 }
 
@@ -403,7 +899,16 @@ function getActiveBrandId() {
     return null;
 }
 
-// Экспортируем функции
-window.renderElementsSection = renderElementsSection;
+// Экспортируем функции для использования в других модулях
+window.renderBrands = renderBrands;
+window.renderLogoSection = renderLogoSection;
+window.renderColorsSection = renderColorsSection;
 window.renderTypographySection = renderTypographySection;
+window.renderElementsSection = renderElementsSection;
+window.setupLoadedElementsHandlers = setupLoadedElementsHandlers;
 window.getActiveBrandId = getActiveBrandId;
+
+// Инициализация модуля при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initBrands();
+});

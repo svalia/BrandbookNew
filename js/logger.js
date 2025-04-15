@@ -32,6 +32,65 @@ function logAction(elementId, actionType, details = null) {
     return logMessage;
 }
 
+// Функция для отслеживания состояния массива брендов
+function trackBrandsState() {
+    const currentState = window.brands ? JSON.parse(JSON.stringify(window.brands)) : [];
+    
+    if (!window.previousBrandsState) {
+        window.previousBrandsState = currentState;
+        return { changed: false, added: 0, removed: 0 };
+    }
+    
+    const previousIds = new Set(window.previousBrandsState.map(brand => brand.id));
+    const currentIds = new Set(currentState.map(brand => brand.id));
+    
+    // Находим добавленные ID
+    const addedIds = [...currentIds].filter(id => !previousIds.has(id));
+    
+    // Находим удаленные ID
+    const removedIds = [...previousIds].filter(id => !currentIds.has(id));
+    
+    // Обновляем сохраненное состояние
+    window.previousBrandsState = currentState;
+    
+    return {
+        changed: addedIds.length > 0 || removedIds.length > 0,
+        added: addedIds.length,
+        removed: removedIds.length,
+        addedIds,
+        removedIds,
+        currentCount: currentState.length
+    };
+}
+
+// Расширяем функцию логирования для отслеживания изменений в массиве брендов
+function enhancedLogAction(elementId, actionType, details = null) {
+    // Вызываем обычное логирование
+    const logMessage = logAction(elementId, actionType, details);
+    
+    // Проверяем изменения в массиве брендов только для определенных действий
+    if (['click', 'submit', 'info', 'change'].includes(actionType)) {
+        const changes = trackBrandsState();
+        
+        if (changes.changed) {
+            logAction('brands-state-track', 'info', {
+                action: 'Brands array changed',
+                added: changes.added,
+                removed: changes.removed,
+                addedIds: changes.addedIds,
+                removedIds: changes.removedIds,
+                currentCount: changes.currentCount
+            });
+        }
+    }
+    
+    return logMessage;
+}
+
+// Переопределяем функцию логирования
+const originalLogAction = window.logAction;
+window.logAction = enhancedLogAction;
+
 // Функция для получения всех логов
 function getLogs() {
     return window.appLogs || [];
@@ -72,7 +131,7 @@ window.addEventListener('error', function(e) {
 });
 
 // Экспортируем функции
-window.logAction = logAction;
+window.logAction = enhancedLogAction;
 window.getLogs = getLogs;
 window.clearLogs = clearLogs;
 window.exportLogs = exportLogs;

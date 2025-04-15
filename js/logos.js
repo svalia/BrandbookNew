@@ -389,6 +389,235 @@ function addLogoToActiveBrand(logoData) {
     logosSection.style.display = 'block';
 }
 
+// Обработчик для формы добавления логотипа
+function setupLogoFormHandler() {
+    const addLogoForm = document.getElementById('addLogoForm');
+    
+    if (addLogoForm) {
+        // Клонируем для удаления старых обработчиков
+        const newForm = addLogoForm.cloneNode(true);
+        addLogoForm.parentNode.replaceChild(newForm, addLogoForm);
+        
+        // Обработчик для отображения/скрытия поля пользовательского цвета
+        const logoColorSelect = newForm.querySelector('#logoColor');
+        const customColorField = newForm.querySelector('#customColorField');
+        
+        if (logoColorSelect && customColorField) {
+            logoColorSelect.addEventListener('change', function() {
+                customColorField.style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+        }
+        
+        // Обработчики для расчета охранного поля и ширины иконки
+        const logoWidthInput = newForm.querySelector('#logoWidth');
+        const logoHeightInput = newForm.querySelector('#logoHeight');
+        const iconWidthInput = newForm.querySelector('#iconWidthPx');
+        const letterBHeightInput = newForm.querySelector('#letterBHeight');
+        const calculatedIconWidth = newForm.querySelector('#calculatedIconWidth');
+        const calculatedSafeZone = newForm.querySelector('#calculatedSafeZone');
+        
+        function calculateValues() {
+            const logoWidth = parseFloat(logoWidthInput.value) || 0;
+            const logoHeight = parseFloat(logoHeightInput.value) || 0;
+            const iconWidth = parseFloat(iconWidthInput.value) || 0;
+            const letterBHeight = parseFloat(letterBHeightInput.value) || 0;
+            
+            // Расчет половины ширины иконки в процентах
+            let iconWidthPercent = 0;
+            if (logoWidth > 0 && iconWidth > 0) {
+                iconWidthPercent = (iconWidth / logoWidth) * 50; // Половина в процентах
+            }
+            
+            // Расчет охранного поля в процентах
+            let safeZone = 0;
+            if (logoHeight > 0 && letterBHeight > 0) {
+                safeZone = (letterBHeight / logoHeight) * 100;
+            }
+            
+            // Обновляем отображение
+            calculatedIconWidth.textContent = iconWidthPercent.toFixed(3);
+            calculatedSafeZone.textContent = safeZone.toFixed(3);
+        }
+        
+        // Добавляем слушатели событий для всех полей
+        [logoWidthInput, logoHeightInput, iconWidthInput, letterBHeightInput].forEach(input => {
+            if (input) {
+                input.addEventListener('input', calculateValues);
+            }
+        });
+        
+        // Обработчик отправки формы
+        newForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Получаем активный бренд
+            const brandId = getActiveBrandId(); // Используем вспомогательную функцию
+            if (!brandId) {
+                alert('Пожалуйста, сначала выберите или создайте бренд');
+                return;
+            }
+            
+            // Находим бренд в существующем массиве
+            const brandIndex = window.brands.findIndex(b => b.id === brandId);
+            if (brandIndex === -1) {
+                alert('Выбранный бренд не найден');
+                return;
+            }
+            
+            // Получаем ссылку на бренд
+            const brand = window.brands[brandIndex];
+            
+            // Убедимся, что у бренда есть секция logos и массив items
+            if (!brand.sections) brand.sections = {};
+            if (!brand.sections.logos) brand.sections.logos = { description: '', items: [] };
+            if (!brand.sections.logos.items) brand.sections.logos.items = [];
+            
+            // Получаем все значения из формы
+            const logoColor = document.getElementById('logoColor').value;
+            const customColor = document.getElementById('customColor').value;
+            const logoLanguage = document.getElementById('logoLanguage').value;
+            const logoType = document.getElementById('logoType').value;
+            const logoOrientation = document.getElementById('logoOrientation').value;
+            const logoWidth = parseFloat(logoWidthInput.value) || 0;
+            const logoHeight = parseFloat(logoHeightInput.value) || 0;
+            const iconWidth = parseFloat(iconWidthInput.value) || 0;
+            const letterBHeight = parseFloat(letterBHeightInput.value) || 0;
+            
+            // Читаем файл как base64
+            const logoFile = document.getElementById('logoFile').files[0];
+            if (!logoFile) {
+                alert('Пожалуйста, выберите файл логотипа');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const logoImage = e.target.result;
+                
+                // Рассчитываем значения
+                const iconWidthPercent = logoWidth > 0 ? (iconWidth / logoWidth * 50).toFixed(3) : "0";
+                const safeZone = logoHeight > 0 ? (letterBHeight / logoHeight * 100).toFixed(3) : "0";
+                
+                // Создаем объект логотипа
+                const newLogo = {
+                    id: Date.now(),
+                    fileName: logoFile.name,
+                    image: logoImage,
+                    properties: {
+                        color: logoColor === 'custom' ? customColor : logoColor,
+                        language: logoLanguage,
+                        type: logoType,
+                        orientation: logoOrientation,
+                        width: logoWidth,
+                        height: logoHeight,
+                        iconWidth: iconWidth,
+                        letterBHeight: letterBHeight,
+                        calculatedIconWidth: parseFloat(iconWidthPercent),
+                        calculatedSafeZone: parseFloat(safeZone)
+                    }
+                };
+                
+                // Добавляем логотип в массив бренда
+                brand.sections.logos.items.push(newLogo);
+                
+                console.log(`Добавлен логотип для бренда ${brand.name}:`, newLogo);
+                
+                // Обновляем отображение в интерфейсе
+                const activeBrandItem = document.querySelector(`.brand-item[data-id="${brandId}"]`);
+                if (activeBrandItem) {
+                    updateLogosInBrandItem(activeBrandItem, brand);
+                } else {
+                    // Если не нашли элемент бренда, обновляем весь список
+                    window.renderBrands();
+                }
+                
+                // Сбрасываем форму
+                newForm.reset();
+                
+                // Скрываем поле пользовательского цвета
+                customColorField.style.display = 'none';
+                
+                // Закрываем модальное окно
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addLogoModal'));
+                if (modal) {
+                    modal.hide();
+                    
+                    // Очистка backdrop
+                    setTimeout(() => {
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) {
+                            backdrop.remove();
+                        }
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }, 300);
+                }
+            };
+            
+            reader.readAsDataURL(logoFile);
+        });
+    }
+}
+
+// Функция для обновления логотипов в DOM без полного перерендеринга
+function updateLogosInBrandItem(brandItem, brand) {
+    const logosGallery = brandItem.querySelector('.logos-gallery');
+    if (!logosGallery) return;
+    
+    // Очищаем галерею
+    logosGallery.innerHTML = '';
+    
+    // Если у бренда нет логотипов, выходим
+    if (!brand.sections?.logos?.items?.length) return;
+    
+    // Добавляем логотипы из бренда
+    brand.sections.logos.items.forEach(logo => {
+        const logoCard = document.createElement('div');
+        logoCard.className = 'logo-card';
+        logoCard.dataset.id = logo.id;
+        
+        logoCard.innerHTML = `
+            <div class="logo-preview">
+                <img src="${logo.image}" alt="Logo ${logo.id}" style="max-width: 100%; max-height: 120px;">
+            </div>
+            <span class="logo-filename">${logo.fileName}</span>
+            <div class="logo-details">
+                <strong>Цвет:</strong> ${logo.properties.color}<br>
+                <strong>Язык:</strong> ${logo.properties.language}<br>
+                <strong>Тип:</strong> ${logo.properties.type}<br>
+                <strong>Ориентация:</strong> ${logo.properties.orientation}
+            </div>
+            <div class="logo-calculated-values">
+                <small><strong>Размеры:</strong> ${logo.properties.width || 0}×${logo.properties.height || 0}px</small><br>
+                <small><strong>Половина ширины иконки:</strong> ${logo.properties.calculatedIconWidth?.toFixed(3) || '0.000'}%</small><br>
+                <small><strong>Охранное поле:</strong> ${logo.properties.calculatedSafeZone?.toFixed(3) || '0.000'}%</small>
+            </div>
+            <button class="delete-logo-btn" data-id="${logo.id}">
+                <img src="img_src/trash-icon.svg" alt="Delete" class="delete-icon">
+            </button>
+        `;
+        
+        logosGallery.appendChild(logoCard);
+        
+        // Добавляем обработчик для кнопки удаления
+        const deleteButton = logoCard.querySelector('.delete-logo-btn');
+        deleteButton.addEventListener('click', function() {
+            const logoId = parseInt(this.dataset.id);
+            
+            // Находим индекс логотипа для удаления
+            const logoIndex = brand.sections.logos.items.findIndex(l => l.id === logoId);
+            if (logoIndex !== -1) {
+                // Удаляем логотип из массива
+                brand.sections.logos.items.splice(logoIndex, 1);
+                
+                // Обновляем отображение
+                updateLogosInBrandItem(brandItem, brand);
+            }
+        });
+    });
+}
+
 // Получение ID активного бренда
 function getActiveBrandId() {
     const activeBrandElement = document.querySelector('.brand-item .brand-sections-content[style*="display: block"]');
@@ -410,3 +639,8 @@ function getActiveBrandId() {
     
     return null;
 }
+
+// Инициализация обработчиков при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    setupLogoFormHandler();
+});
