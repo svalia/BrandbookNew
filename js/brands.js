@@ -931,6 +931,33 @@ function getActiveBrandId() {
     return null;
 }
 
+// Экспортируем функцию getCurrentBrand в глобальный контекст
+window.getCurrentBrand = function() {
+    // Проверяем наличие активного бренда по открытой секции
+    const activeSection = document.querySelector('.brand-sections-content[style*="display: block"]');
+    if (activeSection) {
+        const brandItem = activeSection.closest('.brand-item');
+        if (brandItem && brandItem.dataset && brandItem.dataset.id) {
+            const brandId = parseInt(brandItem.dataset.id, 10);
+            return window.brands.find(brand => brand.id === brandId);
+        }
+    }
+    
+    // Если активный класс не найден через открытую секцию, берем первый бренд из списка
+    const firstBrandElement = document.querySelector('.brand-item');
+    if (firstBrandElement && firstBrandElement.dataset && firstBrandElement.dataset.id) {
+        const brandId = parseInt(firstBrandElement.dataset.id, 10);
+        return window.brands.find(brand => brand.id === brandId);
+    }
+    
+    // Если все еще не нашли, используем первый бренд из массива данных
+    if (window.brands && window.brands.length > 0) {
+        return window.brands[0];
+    }
+    
+    return null;
+};
+
 // Экспортируем функции для использования в других модулях
 window.renderBrands = renderBrands;
 window.renderLogoSection = renderLogoSection;
