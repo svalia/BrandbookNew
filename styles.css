@@ -1608,3 +1608,23 @@ h1 {
     padding-top: 10px;
     font-size: 13px;
 }
+
+/* Стили для кнопок работы с JSON */
+.json-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+#loadJsonBtn, #saveJsonBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#loadJsonBtn::before {
+    content: "📂";
+}
+
+#saveJsonBtn::before {
+    content: "💾";
+}
