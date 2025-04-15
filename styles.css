@@ -1589,6 +1589,34 @@ h1 {
 .add-style-to-set-btn {
     display: block;
     width: 100%;
+    background-color: #1D953C !important;
+    border-color: #1D953C !important;
+    color: white !important; /* Светлый текст для контраста */
+    font-family: 'SB Sans Display', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.add-style-to-set-btn:hover,
+.add-style-to-set-btn:focus {
+    background-color: #21A038 !important;
+    border-color: #21A038 !important;
+    color: white !important;
+}
+
+/* Переопределяем стиль для кнопки outline-primary, чтобы она соответствовала общему дизайну */
+.btn-outline-primary {
+    color: white!important;
+    border-color: #1D953C !important;
+    background-color: #1D953C !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    color: white !important;
+    background-color: #1D953C !important;
+    border-color: #1D953C !important;
 }
 
 .style-preview {
