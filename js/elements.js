@@ -1,384 +1,322 @@
 // Модуль для работы с графическими элементами
 
-// Инициализация модуля
+// Function to initialize elements module
 function initElements() {
     console.log('Elements module initialized');
     
-    // Настройка модального окна добавления графического элемента
+    // Check if the elements modal exists or create it
+    createElementModal(); // Эта функция теперь также вызывает setupElementModal
+}
+
+// Function to set up the element modal
+function setupElementModal() {
+    console.log('[elements.js] -> setupElementModal: Начинаем настройку модального окна элемента.');
+    
+    const addElementForm = document.getElementById('addGraphicElementForm');
+    if (!addElementForm) {
+        console.error('[elements.js] -> setupElementModal: Форма addGraphicElementForm не найдена!');
+        return;
+    }
+    
+    // Set up file input preview
+    const elementFileInput = document.getElementById('elementFile');
+    const elementPreview = document.getElementById('elementPreview');
+    
+    if (elementFileInput && elementPreview) {
+        elementFileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    elementPreview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 200px;">`;
+                };
+                
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                 elementPreview.innerHTML = `<p class="text-muted mb-0">Изображение будет показано здесь после выбора файла</p>`;
+            }
+        });
+    }
+    
+    // Find the intended submit button by ID
+    let submitButton = addElementForm.querySelector('#submitAddElementBtn');
+    
+    if (submitButton) {
+        console.log('[elements.js] -> setupElementModal: Найдена кнопка #submitAddElementBtn.');
+        submitButton.type = 'submit'; 
+    } else {
+        console.warn('[elements.js] -> setupElementModal: Кнопка #submitAddElementBtn не найдена в HTML. Попытка найти по type="submit".');
+        submitButton = addElementForm.querySelector('button[type="submit"]');
+        if (submitButton) {
+            console.log('[elements.js] -> setupElementModal: Найдена кнопка type="submit".');
+            submitButton.id = 'submitAddElementBtn'; // Assign ID if missing
+        } else {
+            console.error('[elements.js] -> setupElementModal: Кнопка отправки не найдена! Проверьте HTML.');
+        }
+    }
+    
+    // Проверка количества кнопок "Добавить элемент" внутри формы ПОСЛЕ настройки
+    const allSubmitButtons = addElementForm.querySelectorAll('button.btn-primary');
+    console.log(`[elements.js] -> setupElementModal: Найдено кнопок '.btn-primary' внутри формы: ${allSubmitButtons.length}`);
+    allSubmitButtons.forEach((btn, index) => {
+        console.log(`  - Кнопка ${index + 1}: ID="${btn.id}", type="${btn.type}", text="${btn.textContent.trim()}"`);
+    });
+    if (allSubmitButtons.length > 1) {
+        console.warn('[elements.js] -> setupElementModal: ВНИМАНИЕ! Обнаружено больше одной кнопки .btn-primary внутри формы addGraphicElementForm.');
+    }
+    
+    // Character counter for description
+    const descriptionField = document.getElementById('elementDescription');
+    const charCounter = document.getElementById('descriptionChars');
+    
+    if (descriptionField && charCounter) {
+        descriptionField.addEventListener('input', function() {
+            const count = this.value.length;
+            charCounter.textContent = count;
+            
+            // Add warning classes
+            if (count > 400) {
+                charCounter.className = count > 450 ? 'danger' : 'warning';
+            } else {
+                charCounter.className = '';
+            }
+        });
+    }
+    
+    // Setup the custom type field toggle
+    const elementTypeSelect = document.getElementById('elementType');
+    const customTypeField = document.getElementById('customTypeField');
+    
+    if (elementTypeSelect && customTypeField) {
+        elementTypeSelect.addEventListener('change', function() {
+            const customTypeInput = document.getElementById('customType');
+            if (this.value === 'Other') {
+                customTypeField.style.display = 'block';
+                customTypeInput.setAttribute('required', 'true');
+            } else {
+                customTypeField.style.display = 'none';
+                customTypeInput.removeAttribute('required');
+            }
+        });
+        elementTypeSelect.dispatchEvent(new Event('change'));
+    }
+}
+
+// Function to create element modal if it doesn't exist
+function createElementModal() {
+    console.log('[elements.js] -> createElementModal: Вызвана функция создания модального окна.');
+    // Check if it already exists
+    if (document.getElementById('addElementModal')) {
+        console.log('[elements.js] -> createElementModal: Модальное окно уже существует.');
+        setupElementModal(); 
+        return;
+    }
+    
+    // Create modal HTML
+    const modalHtml = `
+    <div class="modal fade" id="addElementModal" tabindex="-1" aria-labelledby="addGraphicElementModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGraphicElementModalLabel">Добавить графический элемент</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addGraphicElementForm">
+                        <div class="mb-3">
+                            <label for="elementType" class="form-label">Тип элемента</label>
+                            <select class="form-select" id="elementType" required>
+                                <option value="">Выберите тип элемента</option>
+                                <option value="Textures">Текстуры</option>
+                                <option value="Gradients">Градиенты</option>
+                                <option value="Key-characters">Ключевые персонажи/элементы</option>
+                                <option value="Graphic-elements">Графические элементы</option>
+                                <option value="Advertising-materials">Рекламные материалы</option>
+                                <option value="Locators">Локаторы</option>
+                                <option value="Icons">Иконки</option>
+                                <option value="Illustrations">Иллюстрации</option>
+                                <option value="Other">Другое</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3" id="customTypeField" style="display: none;">
+                            <label for="customType" class="form-label">Название типа</label>
+                            <input type="text" class="form-control" id="customType" placeholder="Введите название типа элемента">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="elementFile" class="form-label">Выберите файл</label>
+                            <input type="file" class="form-control" id="elementFile" accept=".png,.svg" required>
+                            <small class="text-muted">Допустимые форматы: SVG, PNG</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="elementTags" class="form-label">Теги (необязательно)</label>
+                            <input type="text" class="form-control" id="elementTags" placeholder="Введите теги через запятую">
+                            <div class="alert alert-info mt-2">
+                                <strong>Подсказка:</strong> Протегируйте элемент на английском языке, чтобы можно было использовать теги для поиска.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="elementDescription" class="form-label">Описание элемента (необязательно)</label>
+                            <textarea class="form-control" id="elementDescription" rows="3" maxlength="500" placeholder="Где и как используется коротко в 500 символов"></textarea>
+                            <small class="text-muted"><span id="descriptionChars">0</span>/500 символов</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Предпросмотр</label>
+                            <div id="elementPreview" class="element-preview border rounded p-3 text-center">
+                                <p class="text-muted mb-0">Изображение будет показано здесь после выбора файла</p>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="submitAddElementBtn" class="btn btn-primary w-100">Добавить элемент</button> 
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    
+    // Append modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    console.log('[elements.js] -> createElementModal: Модальное окно добавлено в DOM.');
+    
+    // Setup the new modal
     setupElementModal();
 }
 
-// Функция настройки модального окна добавления графического элемента
-function setupElementModal() {
-    console.log('Setting up element modal...');
-    const modal = document.getElementById('addGraphicElementModal');
-    if (!modal) {
-        console.error('Модальное окно для добавления графического элемента не найдено');
-        return;
-    }
+// Function to initialize element handlers
+function initElementsHandlers() {
+    console.log('[elements.js] -> initElementsHandlers: Инициализация обработчиков элементов.');
     
-    console.log('Element modal found, setting up form...');
-    const form = document.getElementById('addGraphicElementForm');
-    if (!form) {
-        console.error('Форма добавления графического элемента не найдена');
-        return;
-    }
+    const addGraphicElementForm = document.getElementById('addGraphicElementForm');
     
-    // Remove any existing submit event listeners to prevent duplicates
-    const clonedForm = form.cloneNode(true);
-    form.parentNode.replaceChild(clonedForm, form);
-    
-    console.log('Element form found, adding submit event listener...');
-    // Add flag to track submission in progress
-    let isSubmitting = false;
-    
-    // Setup file input preview
-    const fileInput = clonedForm.querySelector('#elementFile');
-    const elementPreview = document.getElementById('elementPreview');
-    
-    if (fileInput && elementPreview) {
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.maxWidth = '100%';
-                    img.style.maxHeight = '200px';
-                    elementPreview.innerHTML = '';
-                    elementPreview.appendChild(img);
+    if (addGraphicElementForm) {
+        const newForm = addGraphicElementForm.cloneNode(true);
+        addGraphicElementForm.parentNode.replaceChild(newForm, addGraphicElementForm);
+        
+        newForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('[elements.js] -> Обработчик SUBMIT формы addGraphicElementForm сработал.');
+            
+            const elementTypeSelect = document.getElementById('elementType');
+            const customTypeInput = document.getElementById('customType');
+            const elementFile = document.getElementById('elementFile').files[0];
+            const tagsInput = document.getElementById('elementTags').value.trim();
+            const description = document.getElementById('elementDescription').value.trim();
+            
+            let elementType = elementTypeSelect.value;
+            if (elementType === 'Other') {
+                elementType = customTypeInput.value.trim();
+            }
+            
+            console.log(`[elements.js] -> Тип элемента для сохранения: "${elementType}"`);
+            
+            if (!elementType) {
+                 alert('Пожалуйста, выберите или введите тип элемента');
+                 console.error('[elements.js] -> Ошибка: Тип элемента не выбран/не введен.');
+                 return;
+            }
+            if (!elementFile) {
+                alert('Пожалуйста, выберите файл');
+                console.error('[elements.js] -> Ошибка: Файл не выбран.');
+                return;
+            }
+            
+            let tags = [];
+            if (tagsInput) {
+                tags = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const base64Image = event.target.result;
+                
+                const brandId = window.getActiveBrandId();
+                if (!brandId) {
+                    console.error("[elements.js] -> Не удалось определить активный бренд");
+                    alert("Пожалуйста, сначала выберите бренд");
+                    return;
+                }
+                
+                const brand = window.brands.find(b => b.id === brandId);
+                if (!brand) {
+                    console.error("[elements.js] -> Бренд не найден", brandId);
+                    return;
+                }
+                
+                const newElement = {
+                    id: Date.now(),
+                    type: elementType,
+                    image: base64Image,
+                    description: description,
+                    tags: tags,
+                    fileName: elementFile.name
                 };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-    
-    // Setup description character counter
-    const descriptionTextarea = clonedForm.querySelector('#elementDescription');
-    const descriptionCounter = clonedForm.querySelector('#descriptionChars');
-    
-    if (descriptionTextarea && descriptionCounter) {
-        descriptionTextarea.addEventListener('input', function() {
-            const count = this.value.length;
-            descriptionCounter.textContent = count;
-            
-            if (count > 400) {
-                descriptionCounter.classList.add('warning');
-            } else {
-                descriptionCounter.classList.remove('warning');
-            }
-            
-            if (count > 450) {
-                descriptionCounter.classList.add('danger');
-            } else {
-                descriptionCounter.classList.remove('danger');
-            }
-        });
-    }
-    
-    // Handle form submission
-    clonedForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Prevent duplicate submissions
-        if (isSubmitting) {
-            console.log('Submission already in progress, ignoring duplicate submit event');
-            return;
-        }
-        
-        isSubmitting = true;
-        console.log('Form submitted, processing element data...');
-        
-        const elementType = document.getElementById('elementType').value;
-        const elementFile = document.getElementById('elementFile');
-        const elementTags = document.getElementById('elementTags').value.trim();
-        const elementDescription = document.getElementById('elementDescription').value.trim();
-        
-        if (!elementFile.files || !elementFile.files[0]) {
-            console.error('No file selected');
-            alert('Пожалуйста, выберите файл.');
-            isSubmitting = false;
-            return;
-        }
-        
-        if (!elementTags) {
-            console.error('No tags provided');
-            alert('Пожалуйста, введите хотя бы один тег.');
-            isSubmitting = false;
-            return;
-        }
-        
-        const file = elementFile.files[0];
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const elementData = {
-                id: Date.now(),
-                type: elementType,
-                image: e.target.result,
-                tags: elementTags.split(',').map(tag => tag.trim()),
-                description: elementDescription,
-                fileName: file.name
+                
+                console.log("[elements.js] -> Добавляю новый элемент:", JSON.parse(JSON.stringify(newElement)));
+                
+                if (!brand.sections.elements) {
+                    brand.sections.elements = { items: [] };
+                }
+                if (!brand.sections.elements.items) {
+                    brand.sections.elements.items = [];
+                }
+                brand.sections.elements.items.push(newElement);
+                
+                if (window.renderBrandSections) {
+                    const activeBrandElement = document.querySelector(`.brand-item[data-id="${brandId}"]`);
+                    if (activeBrandElement) {
+                        const sectionsContainer = activeBrandElement.querySelector('.brand-sections-content');
+                        if (sectionsContainer) {
+                             console.log("[elements.js] -> Обновление секций для бренда ID:", brandId);
+                             sectionsContainer.innerHTML = window.renderSections(brand);
+                             window.setupSectionHandlers(activeBrandElement, brand);
+                        }
+                    } else {
+                         console.warn("[elements.js] -> Не найден элемент активного бренда для обновления секций. Выполняем полный ререндер.");
+                         window.renderBrands();
+                    }
+                } else {
+                     console.warn("[elements.js] -> Функция renderBrandSections не найдена. Выполняем полный ререндер.");
+                     window.renderBrands();
+                }
+
+                newForm.reset();
+                document.getElementById('elementPreview').innerHTML = `<p class="text-muted mb-0">Изображение будет показано здесь после выбора файла</p>`;
+                document.getElementById('descriptionChars').textContent = '0';
+                const customTypeField = document.getElementById('customTypeField');
+                if (customTypeField) customTypeField.style.display = 'none';
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addElementModal'));
+                if (modal) {
+                    modal.hide();
+                    console.log("[elements.js] -> Модальное окно закрыто.");
+                } else {
+                     console.error("[elements.js] -> Не удалось получить экземпляр модального окна для закрытия.");
+                }
             };
             
-            addElementToBrand(elementData);
+            reader.onerror = function(error) {
+                 console.error("[elements.js] -> Ошибка чтения файла:", error);
+                 alert("Произошла ошибка при чтении файла.");
+            };
             
-            // Reset submission flag
-            isSubmitting = false;
-            
-            // Reset form
-            clonedForm.reset();
-            elementPreview.innerHTML = '<p class="text-muted mb-0">Изображение будет показано здесь после выбора файла</p>';
-            descriptionCounter.textContent = '0';
-            
-            // Close modal
-            const modalInstance = bootstrap.Modal.getInstance(modal);
-            if (modalInstance) {
-                modalInstance.hide();
-            }
-        };
-        
-        reader.onerror = function(error) {
-            console.error('Error reading file:', error);
-            alert('Произошла ошибка при чтении файла.');
-            isSubmitting = false;
-        };
-        
-        try {
-            reader.readAsDataURL(file);
-        } catch (error) {
-            console.error('Exception when reading file:', error);
-            alert('Произошла ошибка при обработке файла.');
-            isSubmitting = false;
-        }
-    });
-    
-    console.log('Element modal setup completed');
-}
-
-// Функция добавления элемента в бренд
-function addElementToBrand(elementData) {
-    console.log('Adding element to brand:', elementData);
-    
-    // Получаем активный бренд
-    const activeBrandId = window.getActiveBrandId ? window.getActiveBrandId() : null;
-    if (!activeBrandId) {
-        console.error('Не найден активный бренд');
-        alert('Ошибка: Не удалось найти активный бренд. Пожалуйста, выберите бренд перед добавлением элемента.');
-        return;
-    }
-    
-    // Находим бренд в данных
-    const activeBrand = window.brands.find(b => b.id === activeBrandId);
-    if (!activeBrand) {
-        console.error('Бренд не найден в данных');
-        alert('Ошибка: Бренд не найден в данных. Пожалуйста, обновите страницу и попробуйте снова.');
-        return;
-    }
-    
-    console.log('Found brand:', activeBrand.name);
-    
-    // Инициализируем структуру для элементов, если её нет
-    if (!activeBrand.sections) activeBrand.sections = {};
-    if (!activeBrand.sections.elements) activeBrand.sections.elements = {};
-    if (!activeBrand.sections.elements.items) activeBrand.sections.elements.items = [];
-    
-    // Добавляем элемент в данные
-    activeBrand.sections.elements.items.push(elementData);
-    console.log('Element added to brand data. Current elements:', activeBrand.sections.elements.items.length);
-    
-    // Находим секцию в DOM для отображения элемента
-    const brandItem = document.querySelector(`.brand-item[data-id="${activeBrandId}"]`);
-    if (!brandItem) {
-        console.error('Элемент бренда не найден в DOM');
-        return;
-    }
-    
-    // Находим галерею элементов
-    const elementGallery = findElementGallery(brandItem);
-    if (!elementGallery) {
-        console.error('Галерея элементов не найдена в DOM');
-        return;
-    }
-    
-    // Создаем и добавляем элемент в галерею
-    const elementCard = createElementCard(elementData);
-    elementGallery.appendChild(elementCard);
-    
-    console.log('Element card created and added to gallery');
-}
-
-// Функция для нахождения галереи элементов в DOM
-function findElementGallery(brandItem) {
-    const sections = brandItem.querySelectorAll('.section-item');
-    
-    // Ищем секцию "Графические элементы"
-    for (const section of sections) {
-        const title = section.querySelector('.section-title span');
-        if (title && title.textContent.includes('Графические элементы')) {
-            // Нашли нужную секцию, ищем в ней галерею
-            const elementGallery = section.querySelector('.element-gallery');
-            if (elementGallery) {
-                return elementGallery;
-            }
-            
-            // Если галерея не найдена, создаем её
-            const sectionContent = section.querySelector('.section-content');
-            if (sectionContent) {
-                // Проверяем, есть ли уже контейнер для добавления элементов
-                let container = sectionContent.querySelector('.mt-3');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.className = 'mt-3';
-                    sectionContent.appendChild(container);
-                    
-                    const addButton = document.createElement('button');
-                    addButton.className = 'btn btn-primary add-element-btn';
-                    addButton.textContent = 'Добавить';
-                    addButton.addEventListener('click', function() {
-                        const modal = new bootstrap.Modal(document.getElementById('addGraphicElementModal'));
-                        modal.show();
-                    });
-                    container.appendChild(addButton);
-                    
-                    const gallery = document.createElement('div');
-                    gallery.className = 'element-gallery mt-3';
-                    container.appendChild(gallery);
-                    
-                    return gallery;
-                }
-                
-                // Если контейнер есть, ищем в нем галерею
-                let gallery = container.querySelector('.element-gallery');
-                if (!gallery) {
-                    gallery = document.createElement('div');
-                    gallery.className = 'element-gallery mt-3';
-                    container.appendChild(gallery);
-                    
-                    return gallery;
-                }
-                
-                return gallery;
-            }
-        }
-    }
-    
-    return null;
-}
-
-// Функция для создания карточки элемента
-function createElementCard(elementData) {
-    const card = document.createElement('div');
-    card.className = 'element-card';
-    card.dataset.id = elementData.id;
-    
-    // Создаем превью элемента
-    const preview = document.createElement('div');
-    preview.className = 'element-preview';
-    
-    const img = document.createElement('img');
-    img.src = elementData.image;
-    img.alt = elementData.fileName || 'Graphic element';
-    preview.appendChild(img);
-    
-    // Создаем информацию об элементе
-    const info = document.createElement('div');
-    info.className = 'element-info';
-    
-    // Создаем блок с типом элемента
-    const typeClass = elementData.type.replace(/\s+/g, '-');
-    const typeElement = document.createElement('div');
-    typeElement.className = `element-type ${typeClass}`;
-    typeElement.textContent = elementData.type;
-    info.appendChild(typeElement);
-    
-    // Создаем блок с тегами
-    if (elementData.tags && elementData.tags.length) {
-        const tagsContainer = document.createElement('div');
-        tagsContainer.className = 'element-tags';
-        
-        elementData.tags.forEach(tag => {
-            const tagElement = document.createElement('span');
-            tagElement.className = 'element-tag';
-            tagElement.textContent = tag;
-            tagsContainer.appendChild(tagElement);
+            reader.readAsDataURL(elementFile);
         });
-        
-        info.appendChild(tagsContainer);
+    } else {
+        console.error('[elements.js] -> initElementsHandlers: Форма addGraphicElementForm не найдена для добавления обработчика submit.');
     }
-    
-    // Создаем блок с описанием, если оно есть
-    if (elementData.description) {
-        const descriptionLink = document.createElement('div');
-        descriptionLink.className = 'element-description-link element-tooltip';
-        descriptionLink.textContent = 'Подробнее';
-        
-        const tooltip = document.createElement('span');
-        tooltip.className = 'tooltip-text';
-        tooltip.textContent = elementData.description;
-        
-        descriptionLink.appendChild(tooltip);
-        info.appendChild(descriptionLink);
-        
-        // Добавляем обработчик для позиционирования тултипа
-        descriptionLink.addEventListener('mouseenter', function(e) {
-            const rect = descriptionLink.getBoundingClientRect();
-            tooltip.style.bottom = `${window.innerHeight - rect.top + 10}px`;
-            tooltip.style.left = `${rect.left}px`;
-        });
-    }
-    
-    // Создаем кнопку удаления
-    const deleteButton = document.createElement('button');
-    deleteButton.className = 'delete-element-btn';
-    deleteButton.title = 'Удалить элемент';
-    
-    const deleteIcon = document.createElement('img');
-    deleteIcon.src = 'img_src/trash-icon.svg';
-    deleteIcon.alt = 'Удалить';
-    
-    deleteButton.appendChild(deleteIcon);
-    
-    // Добавляем обработчик удаления
-    deleteButton.addEventListener('click', function() {
-        deleteElement(elementData.id);
-        card.remove();
-    });
-    
-    // Собираем карточку
-    card.appendChild(preview);
-    card.appendChild(info);
-    card.appendChild(deleteButton);
-    
-    return card;
 }
 
-// Функция для удаления элемента
-function deleteElement(elementId) {
-    console.log('Deleting element with ID:', elementId);
-    
-    const activeBrandId = window.getActiveBrandId ? window.getActiveBrandId() : null;
-    if (!activeBrandId) {
-        console.error('Не найден активный бренд');
-        return;
-    }
-    
-    const activeBrand = window.brands.find(b => b.id === activeBrandId);
-    if (!activeBrand || !activeBrand.sections || !activeBrand.sections.elements || !activeBrand.sections.elements.items) {
-        console.error('Элементы не найдены для бренда');
-        return;
-    }
-    
-    const initialLength = activeBrand.sections.elements.items.length;
-    activeBrand.sections.elements.items = activeBrand.sections.elements.items.filter(item => item.id !== elementId);
-    console.log(`Element deleted. Elements before: ${initialLength}, after: ${activeBrand.sections.elements.items.length}`);
-}
-
-// Экспортируем функции
+// Export functions
 window.initElements = initElements;
-window.addElementToBrand = addElementToBrand;
-window.deleteElement = deleteElement;
 
-// Инициализация модуля при загрузке страницы
-document.addEventListener('DOMContentLoaded', initElements);
+// Initialize on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded event: initializing elements module');
+    initElements();
+    initElementsHandlers(); 
+});

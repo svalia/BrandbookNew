@@ -4,14 +4,32 @@
 function initTypography() {
     console.log('Typography module initialized');
     
+    // Проверяем наличие модальных окон
+    checkModals();
+    
     // Настройка модального окна для шрифтов
     setupFontModal();
     
     // Настройка модального окна для наборов стилей
-    setupStyleModal();
+    setupStyleSetModal();
     
     // Настройка модального окна для добавления стиля в набор
     setupAddStyleToSetModal();
+}
+
+// Функция проверки наличия модальных окон
+function checkModals() {
+    console.log("Checking if modals exist...");
+    const addStyleSetModal = document.getElementById('addStyleSetModal');
+    const addElementModal = document.getElementById('addElementModal');
+    
+    if (!addStyleSetModal) {
+        console.error("Modal #addStyleSetModal not found in the DOM!");
+    }
+    
+    if (!addElementModal) {
+        console.error("Modal #addElementModal not found in the DOM!");
+    }
 }
 
 // Настройка модального окна для шрифтов
@@ -209,77 +227,150 @@ function updateFontsList(brand) {
     });
 }
 
-// Функция настройки модального окна добавления стиля
-function setupStyleModal() {
+// Функция настройки модального окна добавления набора стилей
+function setupStyleSetModal() {
     console.log('Setting up style set modal...');
-    const modal = document.getElementById('addStyleModal');
-    if (!modal) {
-        console.warn('Модальное окно для добавления набора стилей не найдено');
+    
+    const styleSetModal = document.getElementById('addStyleSetModal');
+    if (!styleSetModal) {
+        console.error('Style set modal not found, creating one...');
+        // Create the modal if it doesn't exist
+        createStyleSetModal();
         return;
     }
     
-    console.log('Style set modal found, setting up form...');
-    const form = document.getElementById('addStyleForm');
-    if (!form) {
-        console.error('Форма добавления набора стилей не найдена');
+    // Find the save button instead of form
+    const saveStyleSetBtn = document.getElementById('saveStyleSetBtn');
+    if (!saveStyleSetBtn) {
+        console.error('Save button not found');
         return;
     }
     
-    // Remove any existing event listeners
-    const clonedForm = form.cloneNode(true);
-    form.parentNode.replaceChild(clonedForm, form);
+    // Remove previous event listeners
+    const newBtn = saveStyleSetBtn.cloneNode(true);
+    if (saveStyleSetBtn.parentNode) {
+        saveStyleSetBtn.parentNode.replaceChild(newBtn, saveStyleSetBtn);
+    }
     
-    console.log('Style set form found, adding submit event listener...');
-    let isSubmitting = false;
-    
-    clonedForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (isSubmitting) {
-            console.log('Submission already in progress, ignoring duplicate submit event');
-            return;
-        }
-        
-        isSubmitting = true;
-        console.log('Style set form submitted, processing data...');
-        
+    newBtn.addEventListener('click', function(e) {
         const styleSetNameInput = document.getElementById('styleSetName');
-        const styleSetName = styleSetNameInput.value.trim();
-        
-        if (!styleSetName) {
-            console.error('No style set name provided');
-            alert('Пожалуйста, введите название набора стилей');
-            isSubmitting = false;
+        if (!styleSetNameInput) {
+            console.error('Style set name input not found');
             return;
         }
         
-        // Создаем объект набора стилей
-        const styleSet = {
+        const styleSetName = styleSetNameInput.value.trim();
+        if (!styleSetName) {
+            alert('Пожалуйста, введите название набора стилей');
+            return;
+        }
+        
+        // Get active brand
+        const brandId = window.getActiveBrandId();
+        if (!brandId) {
+            alert('Пожалуйста, сначала выберите бренд');
+            return;
+        }
+        
+        // Get brand from global array
+        const brand = window.brands.find(b => b.id === brandId);
+        if (!brand) {
+            alert('Выбранный бренд не найден');
+            return;
+        }
+        
+        // Initialize typography sections if they don't exist
+        if (!brand.sections) brand.sections = {};
+        if (!brand.sections.typography) brand.sections.typography = {};
+        if (!brand.sections.typography.styleSets) brand.sections.typography.styleSets = [];
+        
+        // Create a new style set
+        const newStyleSet = {
             id: Date.now(),
             name: styleSetName,
-            styles: [] // Массив стилей в наборе
+            styles: []
         };
         
-        console.log('Style set created:', { id: styleSet.id, name: styleSet.name });
+        // Add the style set to the brand
+        brand.sections.typography.styleSets.push(newStyleSet);
         
-        // Добавляем набор стилей в текущий бренд
-        addStyleSetToBrand(styleSet);
+        // Update the interface
+        const styleSetBlock = document.querySelector('#styleSetsBlock');
+        if (styleSetBlock) {
+            styleSetBlock.style.display = 'block';
+        }
         
-        // Reset submission flag
-        isSubmitting = false;
+        // Re-render the typography section or just add the new set
+        const typographySection = document.querySelector(`.brand-item[data-id="${brandId}"] .section-item[data-section="typography"] .section-content`);
+        if (typographySection && window.renderTypographySection) {
+            const typographyContent = window.renderTypographySection(brand);
+            typographySection.innerHTML = `
+                <div class="description-block">
+                    <div class="description-content formatted-description">${brand.sections.typography.description || ""}</div>
+                    <button class="add-description-btn btn btn-primary">
+                        ${brand.sections.typography.description ? 'Редактировать описание' : 'Добавить описание'}
+                    </button>
+                </div>
+                ${typographyContent}
+            `;
+            
+            // Setup handlers for the new elements
+            if (window.setupLoadedElementsHandlers) {
+                const brandItem = typographySection.closest('.brand-item');
+                if (brandItem) {
+                    window.setupLoadedElementsHandlers(brandItem, brand);
+                }
+            }
+        }
         
-        // Сбрасываем форму
-        clonedForm.reset();
+        // Reset form field
+        styleSetNameInput.value = '';
         
-        // Закрываем модальное окно
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        if (modalInstance) {
-            modalInstance.hide();
-            console.log('Style set modal closed');
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addStyleSetModal'));
+        if (modal) {
+            modal.hide();
+        } else {
+            console.error('Could not get modal instance');
         }
     });
+}
+
+// Function to create style set modal if it doesn't exist
+function createStyleSetModal() {
+    // Check if it already exists
+    if (document.getElementById('addStyleSetModal')) {
+        return;
+    }
     
-    console.log('Style set modal setup completed');
+    // Create modal HTML
+    const modalHtml = `
+    <div class="modal fade" id="addStyleSetModal" tabindex="-1" aria-labelledby="addStyleSetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addStyleSetModalLabel">Добавить набор стилей</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addStyleForm" onsubmit="return false;">
+                        <div class="mb-3">
+                            <label for="styleSetName" class="form-label">Название набора стилей шрифтов</label>
+                            <input type="text" class="form-control" id="styleSetName" placeholder="Введите название набора" required>
+                        </div>
+                        <button type="button" id="saveStyleSetBtn" class="btn btn-primary w-100">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    
+    // Append modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Setup the new modal
+    setupStyleSetModal();
 }
 
 // Функция настройки модального окна добавления стиля в набор
@@ -298,16 +389,27 @@ function setupAddStyleToSetModal() {
         return;
     }
     
-    // Remove any existing event listeners
-    const clonedForm = form.cloneNode(true);
-    form.parentNode.replaceChild(clonedForm, form);
+    // Prevent default form submission
+    form.setAttribute('onsubmit', 'return false;');
+    
+    // Find or create submit button
+    let submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) {
+        // Change to button type
+        submitButton.type = 'button';
+        
+        // Remove previous event listeners
+        const newButton = submitButton.cloneNode(true);
+        submitButton.parentNode.replaceChild(newButton, submitButton);
+        submitButton = newButton;
+    }
     
     // Find all form elements we need to handle
-    const styleSetIdInput = clonedForm.querySelector('#styleSetId');
-    const styleFontSizeInput = clonedForm.querySelector('#styleFontSize');
-    const styleLineHeightInput = clonedForm.querySelector('#styleLineHeight');
-    const styleFontIdSelect = clonedForm.querySelector('#styleFontId');
-    const previewStyleText = clonedForm.querySelector('#previewStyleText');
+    const styleSetIdInput = document.getElementById('styleSetId');
+    const styleFontSizeInput = document.getElementById('styleFontSize');
+    const styleLineHeightInput = document.getElementById('styleLineHeight');
+    const styleFontIdSelect = document.getElementById('styleFontId');
+    const previewStyleText = document.getElementById('previewStyleText');
     
     // Add event listeners to update preview
     function updatePreview() {
@@ -332,11 +434,13 @@ function setupAddStyleToSetModal() {
                         isItalic = selectedFont.isItalic;
                         
                         // Update the preview style to match the selected font
-                        previewStyleText.style.fontFamily = `"${fontFamily}", sans-serif`;
-                        previewStyleText.style.fontWeight = getFontWeight(fontType);
-                        previewStyleText.style.fontStyle = isItalic ? 'italic' : 'normal';
-                        previewStyleText.style.fontSize = `${fontSize}px`;
-                        previewStyleText.style.lineHeight = `${lineHeight}px`;
+                        if (previewStyleText) {
+                            previewStyleText.style.fontFamily = `"${fontFamily}", sans-serif`;
+                            previewStyleText.style.fontWeight = getFontWeight(fontType);
+                            previewStyleText.style.fontStyle = isItalic ? 'italic' : 'normal';
+                            previewStyleText.style.fontSize = `${fontSize}px`;
+                            previewStyleText.style.lineHeight = `${lineHeight}px`;
+                        }
                     }
                 }
             }
@@ -344,7 +448,7 @@ function setupAddStyleToSetModal() {
         
         // Get the style set name
         let styleSetName = "Стиль";
-        const styleSetId = styleSetIdInput.value;
+        const styleSetId = styleSetIdInput ? styleSetIdInput.value : null;
         if (styleSetId) {
             const activeBrandId = window.getActiveBrandId ? window.getActiveBrandId() : null;
             if (activeBrandId) {
@@ -360,92 +464,135 @@ function setupAddStyleToSetModal() {
         
         // Update preview text
         const italicText = isItalic ? ' · Italic' : '';
-        previewStyleText.textContent = `${fontSize}/${lineHeight} · ${styleSetName} · ${fontFamily} · ${fontType}${italicText}`;
+        if (previewStyleText) {
+            previewStyleText.textContent = `${fontSize}/${lineHeight} · ${styleSetName} · ${fontFamily} · ${fontType}${italicText}`;
+        }
     }
     
-    styleFontSizeInput.addEventListener('input', updatePreview);
-    styleLineHeightInput.addEventListener('input', updatePreview);
-    styleFontIdSelect.addEventListener('change', updatePreview);
+    if (styleFontSizeInput) {
+        styleFontSizeInput.addEventListener('input', updatePreview);
+    }
+    
+    if (styleLineHeightInput) {
+        styleLineHeightInput.addEventListener('input', updatePreview);
+    }
+    
+    if (styleFontIdSelect) {
+        styleFontIdSelect.addEventListener('change', updatePreview);
+    }
     
     // Setup form submission
     console.log('Add style to set form found, adding submit event listener...');
-    let isSubmitting = false;
     
-    clonedForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (isSubmitting) {
-            console.log('Submission already in progress, ignoring duplicate submit event');
-            return;
-        }
-        
-        isSubmitting = true;
-        console.log('Add style to set form submitted');
-        
-        const styleSetId = parseInt(styleSetIdInput.value, 10);
-        const fontSize = parseInt(styleFontSizeInput.value, 10);
-        const lineHeight = parseInt(styleLineHeightInput.value, 10);
-        const fontId = parseInt(styleFontIdSelect.value, 10);
-        
-        if (!styleSetId) {
-            console.error('No style set ID provided');
-            alert('Ошибка: ID набора стилей не указан');
-            isSubmitting = false;
-            return;
-        }
-        
-        if (!fontSize || !lineHeight || !fontId) {
-            console.error('Missing required fields');
-            alert('Пожалуйста, заполните все обязательные поля');
-            isSubmitting = false;
-            return;
-        }
-        
-        // Get font details
-        const activeBrandId = window.getActiveBrandId ? window.getActiveBrandId() : null;
-        if (activeBrandId) {
-            const activeBrand = window.brands.find(b => b.id === activeBrandId);
-            if (activeBrand && activeBrand.sections && activeBrand.sections.typography) {
-                const selectedFont = activeBrand.sections.typography.fonts.find(f => f.id === fontId);
-                if (!selectedFont) {
-                    console.error('Selected font not found');
-                    alert('Ошибка: Выбранный шрифт не найден');
-                    isSubmitting = false;
-                    return;
-                }
-                
-                // Create style object
-                const style = {
-                    id: Date.now(),
-                    fontSize: fontSize,
-                    lineHeight: lineHeight,
-                    fontId: fontId,
-                    fontFamily: selectedFont.family,
-                    fontType: selectedFont.type,
-                    isItalic: selectedFont.isItalic
-                };
-                
-                // Add style to the style set
-                addStyleToStyleSet(styleSetId, style);
-                
-                // Reset form
-                clonedForm.reset();
-                previewStyleText.textContent = '-/- · Стиль · - · - · -';
-                previewStyleText.style = ''; // Reset inline styles
-                
-                // Close modal
-                const modalInstance = bootstrap.Modal.getInstance(modal);
-                if (modalInstance) {
-                    modalInstance.hide();
-                    console.log('Add style to set modal closed');
+    if (submitButton) {
+        submitButton.addEventListener('click', function() {
+            const styleSetId = styleSetIdInput ? parseInt(styleSetIdInput.value, 10) : null;
+            const fontSize = styleFontSizeInput ? parseInt(styleFontSizeInput.value, 10) : null;
+            const lineHeight = styleLineHeightInput ? parseInt(styleLineHeightInput.value, 10) : null;
+            const fontId = styleFontIdSelect ? parseInt(styleFontIdSelect.value, 10) : null;
+            
+            if (!styleSetId) {
+                console.error('No style set ID provided');
+                alert('Ошибка: ID набора стилей не указан');
+                return;
+            }
+            
+            if (!fontSize || !lineHeight || !fontId) {
+                console.error('Missing required fields');
+                alert('Пожалуйста, заполните все обязательные поля');
+                return;
+            }
+            
+            // Get font details
+            const activeBrandId = window.getActiveBrandId ? window.getActiveBrandId() : null;
+            if (activeBrandId) {
+                const activeBrand = window.brands.find(b => b.id === activeBrandId);
+                if (activeBrand && activeBrand.sections && activeBrand.sections.typography) {
+                    const selectedFont = activeBrand.sections.typography.fonts.find(f => f.id === fontId);
+                    if (!selectedFont) {
+                        console.error('Selected font not found');
+                        alert('Ошибка: Выбранный шрифт не найден');
+                        return;
+                    }
+                    
+                    // Create style object
+                    const style = {
+                        id: Date.now(),
+                        fontSize: fontSize,
+                        lineHeight: lineHeight,
+                        fontId: fontId,
+                        fontFamily: selectedFont.family,
+                        fontType: selectedFont.type,
+                        isItalic: selectedFont.isItalic
+                    };
+                    
+                    // Add style to the style set
+                    const styleSetIndex = activeBrand.sections.typography.styleSets.findIndex(set => set.id === styleSetId);
+                    if (styleSetIndex !== -1) {
+                        if (!activeBrand.sections.typography.styleSets[styleSetIndex].styles) {
+                            activeBrand.sections.typography.styleSets[styleSetIndex].styles = [];
+                        }
+                        activeBrand.sections.typography.styleSets[styleSetIndex].styles.push(style);
+                        
+                        // Re-render the typography section
+                        const typographySection = document.querySelector(`.brand-item[data-id="${activeBrandId}"] .section-item[data-section="typography"] .section-content`);
+                        if (typographySection && window.renderTypographySection) {
+                            const typographyContent = window.renderTypographySection(activeBrand);
+                            typographySection.innerHTML = `
+                                <div class="description-block">
+                                    <div class="description-content formatted-description">${activeBrand.sections.typography.description || ""}</div>
+                                    <button class="add-description-btn btn btn-primary">
+                                        ${activeBrand.sections.typography.description ? 'Редактировать описание' : 'Добавить описание'}
+                                    </button>
+                                </div>
+                                ${typographyContent}
+                            `;
+                            
+                            // Setup handlers for the new elements
+                            if (window.setupLoadedElementsHandlers) {
+                                const brandItem = typographySection.closest('.brand-item');
+                                if (brandItem) {
+                                    window.setupLoadedElementsHandlers(brandItem, activeBrand);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Reset form fields
+                    if (styleFontSizeInput) styleFontSizeInput.value = '';
+                    if (styleLineHeightInput) styleLineHeightInput.value = '';
+                    if (styleFontIdSelect) styleFontIdSelect.value = '';
+                    if (previewStyleText) {
+                        previewStyleText.textContent = '-/- · Стиль · - · - · -';
+                        previewStyleText.style = ''; // Reset inline styles
+                    }
+                    
+                    // Close the modal
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                        console.log('Add style to set modal closed');
+                    }
                 }
             }
-        }
-        
-        isSubmitting = false;
-    });
+        });
+    }
     
     console.log('Add style to set modal setup completed');
+}
+
+// Helper function to get font weight from font type
+function getFontWeight(fontType) {
+    switch (fontType) {
+        case 'Thin': return '100';
+        case 'Light': return '300';
+        case 'Regular': return '400';
+        case 'Medium': return '500';
+        case 'Semibold': return '600';
+        case 'Bold': return '700';
+        case 'Heavy': return '900';
+        default: return '400';
+    }
 }
 
 // Экспортируем функции для использования в других модулях

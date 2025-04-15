@@ -585,7 +585,9 @@ function renderTypographySection(brand) {
 
 // Функция для рендеринга раздела графических элементов
 function renderElementsSection(brand) {
+    console.log(`[brands.js] -> renderElementsSection: Рендеринг секции элементов для бренда ID: ${brand.id}`);
     if (!brand || !brand.sections || !brand.sections.elements) {
+        console.warn(`[brands.js] -> renderElementsSection: Нет данных для секции элементов у бренда ID: ${brand.id}`);
         return '';
     }
 
@@ -596,22 +598,64 @@ function renderElementsSection(brand) {
         <div class="elements-gallery">`;
     
     if (brand.sections.elements.items && brand.sections.elements.items.length > 0) {
-        brand.sections.elements.items.forEach(element => {
-            elementsHTML += `
+        console.log(`[brands.js] -> renderElementsSection: Найдено ${brand.sections.elements.items.length} элементов.`);
+        brand.sections.elements.items.forEach((element, index) => {
+            console.log(`[brands.js] -> renderElementsSection: Обработка элемента ${index + 1} (ID: ${element.id})`);
+            console.log(`  - Данные элемента:`, JSON.parse(JSON.stringify(element))); // Логируем копию объекта
+
+            // Убедимся, что тип элемента существует и не пустой
+            let elementType = (element.type || '').trim(); // Используем 'type', а не 'name'
+            let elementTypeClass = '';
+            
+            if (elementType) {
+                elementTypeClass = elementType.replace(/\s+/g, '-'); // Генерируем класс только если тип есть
+                console.log(`  - Тип элемента определен: "${elementType}", Класс для CSS: "${elementTypeClass}"`);
+            } else {
+                console.warn(`  - ВНИМАНИЕ: Тип элемента (element.type) пуст или отсутствует для элемента ID: ${element.id}`);
+                elementType = ''; // Устанавливаем в пустую строку, если тип не определен
+            }
+            
+            // Корректно форматируем теги
+            let tagsHtml = '';
+            if (element.tags && Array.isArray(element.tags) && element.tags.length > 0) {
+                tagsHtml = element.tags.map(tag => `<span class="element-tag">${tag}</span>`).join('');
+            }
+            
+            // Формируем HTML для карточки
+            const cardHTML = `
                 <div class="element-card" data-id="${element.id}">
                     <div class="element-preview">
-                        <img src="${element.image}" alt="Element ${element.id}" style="max-width: 100%; max-height: 200px;">
+                        <img src="${element.image}" alt="${element.fileName || 'element preview'}">
                     </div>
                     <div class="element-info">
-                        <h4>${element.name}</h4>
-                        <div class="element-description">${element.description || ''}</div>
+                        <div class="element-type ${elementTypeClass}">${elementType}</div> 
+                        <div class="element-tags">
+                            ${tagsHtml}
+                        </div>
+                        <div class="element-description-link">
+                            Подробнее
+                            <div class="tooltip-text">${element.description || 'Нет описания'}</div>
+                        </div>
                     </div>
-                    <button class="delete-element-btn" data-id="${element.id}">
-                        <img src="img_src/trash-icon.svg" alt="Delete" class="delete-icon">
+                    <button class="delete-element-btn" title="Удалить элемент" data-id="${element.id}">
+                        <img src="img_src/trash-icon.svg" alt="Удалить">
                     </button>
                 </div>
             `;
+            
+            // Проверяем, содержит ли сгенерированный HTML блок типа
+            if (!cardHTML.includes('<div class="element-type')) {
+                 console.error(`  - ОШИБКА: В сгенерированном HTML для карточки ID ${element.id} отсутствует блок <div class="element-type...">`);
+            } else if (elementType === '' && cardHTML.includes('<div class="element-type "')) {
+                 console.log(`  - INFO: Блок <div class="element-type"> рендерится, но он пуст, так как тип элемента не задан.`);
+            } else if (elementType !== '') {
+                 console.log(`  - INFO: Блок <div class="element-type ${elementTypeClass}">${elementType}</div> успешно добавлен в HTML.`);
+            }
+
+            elementsHTML += cardHTML;
         });
+    } else {
+         console.log(`[brands.js] -> renderElementsSection: Элементы не найдены (brand.sections.elements.items пуст или отсутствует).`);
     }
     
     elementsHTML += '</div>';
@@ -861,11 +905,6 @@ function setupLoadedElementsHandlers(brandItem, brand) {
             }
         });
     });
-    
-    // Настраиваем кнопки действий с цветами
-    if (typeof window.setupActionButtons === 'function') {
-        window.setupActionButtons();
-    }
 }
 
 // Функция для получения ID активного бренда

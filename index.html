@@ -275,11 +275,11 @@
     </div>
 
     <!-- Модальное окно для добавления графического элемента -->
-    <div class="modal fade" id="addGraphicElementModal" tabindex="-1" aria-labelledby="addGraphicElementModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addElementModal" tabindex="-1" aria-labelledby="addElementModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addGraphicElementModalLabel">Добавить графический элемент</h5>
+                    <h5 class="modal-title" id="addElementModalLabel">Добавить графический элемент</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
@@ -290,9 +290,9 @@
                                 <option value="">Выберите тип элемента</option>
                                 <option value="Textures">Текстуры</option>
                                 <option value="Gradients">Градиенты</option>
-                                <option value="Key characters">Ключевые персонажи/элементы</option>
-                                <option value="Graphic elements">Графические элементы</option>
-                                <option value="Advertising materials">Рекламные материалы</option>
+                                <option value="Key-characters">Ключевые персонажи/элементы</option>
+                                <option value="Graphic-elements">Графические элементы</option>
+                                <option value="Advertising-materials">Рекламные материалы</option>
                                 <option value="Locators">Локаторы</option>
                                 <option value="Icons">Иконки</option>
                                 <option value="Illustrations">Иллюстрации</option>
@@ -312,15 +312,15 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="elementTags" class="form-label">Теги</label>
-                            <input type="text" class="form-control" id="elementTags" placeholder="Введите теги через запятую" required>
+                            <label for="elementTags" class="form-label">Теги (необязательно)</label>
+                            <input type="text" class="form-control" id="elementTags" placeholder="Введите теги через запятую">
                             <div class="alert alert-info mt-2">
-                                <strong>Важно!</strong> Протегируйте элемент на английском языке и таким образом, чтобы можено было по тегам выбирать датасеты для обучения модели генерировать персонажи, локаторы и прочее. Т.е. проставляйте теги осознанно.
+                                <strong>Подсказка:</strong> Протегируйте элемент на английском языке, чтобы можно было использовать теги для поиска.
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="elementDescription" class="form-label">Описание элемента</label>
+                            <label for="elementDescription" class="form-label">Описание элемента (необязательно)</label>
                             <textarea class="form-control" id="elementDescription" rows="3" maxlength="500" placeholder="Где и как используется коротко в 500 символов"></textarea>
                             <small class="text-muted"><span id="descriptionChars">0</span>/500 символов</small>
                         </div>
@@ -332,7 +332,8 @@
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100">Добавить элемент</button>
+                        <!-- Добавляем ID к кнопке -->
+                        <button type="submit" id="submitAddElementBtn" class="btn btn-primary w-100">Добавить элемент</button>
                     </form>
                 </div>
             </div>
@@ -385,12 +386,12 @@
         </div>
     </div>
 
-    <!-- Модальное окно для добавления стиля -->
-    <div class="modal fade" id="addStyleModal" tabindex="-1" aria-labelledby="addStyleModalLabel" aria-hidden="true">
+    <!-- Модальное окно для добавления набора стилей -->
+    <div class="modal fade" id="addStyleSetModal" tabindex="-1" aria-labelledby="addStyleSetModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addStyleModalLabel">Добавить набор стилей</h5>
+                    <h5 class="modal-title" id="addStyleSetModalLabel">Добавить набор стилей</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
