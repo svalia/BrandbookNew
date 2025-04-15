@@ -484,39 +484,31 @@ function renderTypographySection(brand) {
             <button class="add-description-btn btn btn-primary" id="addFont" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
             <button class="add-description-btn btn btn-primary" id="addStyleSet" data-bs-toggle="modal" data-bs-target="#addStyleSetModal">Добавить набор стилей</button>
         </div>
-        <div id="typographyContent">`;
+        <div class="typography-content mt-3">`;
     
     // Шрифты
+    const fontsBlockId = `fontsBlock-${brand.id}`;
     typographyHTML += `
-        <div class="typography-section" id="fontsBlock" ${brand.sections.typography.fonts && brand.sections.typography.fonts.length > 0 ? '' : 'style="display: none;"'}>
-            <h3>Шрифты</h3>
-            <div class="fonts-gallery" id="fontsGallery">`;
+        <div class="fonts-block" id="${fontsBlockId}" ${brand.sections.typography.fonts && brand.sections.typography.fonts.length > 0 ? '' : 'style="display: none;"'}>
+            <h3>Добавленные шрифты</h3>
+            <div class="fonts-list">`;
     
     if (brand.sections.typography.fonts && brand.sections.typography.fonts.length > 0) {
         brand.sections.typography.fonts.forEach(font => {
             typographyHTML += `
-                <div class="font-card" data-id="${font.id}">
+                <div class="font-item" data-id="${font.id}">
                     <div class="font-info">
-                        <h4>${font.family} ${font.type}${font.isItalic ? ' Italic' : ''}</h4>
-                        <style>
-                            @font-face {
-                                font-family: '${font.family}-${font.id}';
-                                src: url('${font.base64}') format('woff');
-                                font-weight: ${font.type === 'Bold' ? 'bold' : 'normal'};
-                                font-style: ${font.isItalic ? 'italic' : 'normal'};
-                            }
-                        </style>
-                        <div class="font-preview" style="font-family: '${font.family}-${font.id}'">
-                            Съешь ещё этих мягких французских булок, да выпей чаю.<br>
-                            АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ<br>
-                            абвгдеёжзийклмнопрстуфхцчшщъыьэюя<br>
-                            1234567890!@#$%^&*()_+
-                        </div>
-                        <div class="font-filename">${font.fileName || 'Без имени файла'}</div>
+                        <div class="font-name font-type-${font.type.toLowerCase()} ${font.isItalic ? 'font-italic' : ''}">${font.family} ${font.type}</div>
+                        ${font.isItalic ? '<div class="font-tag">Italic</div>' : ''}
                     </div>
-                    <button class="delete-font-btn" data-id="${font.id}">
-                        <img src="img_src/trash-icon.svg" alt="Delete" class="delete-icon">
-                    </button>
+                    <div class="font-actions">
+                        <button class="download-font-btn" title="Скачать шрифт">
+                            <img src="img_src/download-icon.svg" alt="Скачать">
+                        </button>
+                        <button class="delete-font-btn" title="Удалить шрифт" data-id="${font.id}">
+                            <img src="img_src/trash-icon.svg" alt="Удалить">
+                        </button>
+                    </div>
                 </div>
             `;
         });
@@ -587,7 +579,7 @@ function renderTypographySection(brand) {
     
     typographyHTML += `</div></div>`;
     
-    typographyHTML += '</div>'; // Закрываем typographyContent
+    typographyHTML += '</div>'; // Закрываем typography-content
     return typographyHTML;
 }
 
@@ -801,10 +793,11 @@ function setupLoadedElementsHandlers(brandItem, brand) {
             
             if (fontIndex !== -1) {
                 brand.sections.typography.fonts.splice(fontIndex, 1);
-                this.closest('.font-card').remove();
+                this.closest('.font-item').remove();
                 
                 if (brand.sections.typography.fonts.length === 0) {
-                    brandItem.querySelector('#fontsBlock').style.display = 'none';
+                    const fontsBlockId = `fontsBlock-${brand.id}`;
+                    brandItem.querySelector(`#${fontsBlockId}`).style.display = 'none';
                 }
             }
         });

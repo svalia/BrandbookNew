@@ -170,7 +170,7 @@ async function saveJsonData() {
     }
 }
 
-// Функция для обработки загруженных данных
+// Обработка данных после загрузки JSON
 async function processLoadedData(data) {
     try {
         // Проверяем структуру загруженных данных
@@ -263,21 +263,44 @@ async function processLoadedData(data) {
         // Рендерим бренды
         window.renderBrands();
         
-        // После рендеринга можно автоматически раскрыть первый бренд
+        // После загрузки данных, нам нужно обновить интерфейс для каждого бренда
+        window.brands.forEach(brand => {
+            // Проверяем и обновляем шрифты, если они есть
+            if (brand.sections && brand.sections.typography && brand.sections.typography.fonts && 
+                brand.sections.typography.fonts.length > 0) {
+                // Находим DOM-элемент для бренда
+                const brandItem = document.querySelector(`.brand-item[data-id="${brand.id}"]`);
+                if (brandItem && window.updateFontsList) {
+                    window.updateFontsList(brand);
+                }
+            }
+        });
+        
+        // После рендеринга разворачиваем первый бренд и его секции для отображения всех элементов
         setTimeout(() => {
-            const firstBrand = document.querySelector('.brand-item');
-            if (firstBrand) {
-                const toggleSection = firstBrand.querySelector('.toggle-section');
-                if (toggleSection) {
-                    toggleSection.click();
+            const firstBrandItem = document.querySelector('.brand-item');
+            if (firstBrandItem) {
+                // Разворачиваем бренд
+                const toggleBrand = firstBrandItem.querySelector('.toggle-section');
+                if (toggleBrand) {
+                    toggleBrand.click();
                     
-                    // И раскрыть секции этого бренда
+                    // Разворачиваем все секции этого бренда через небольшую задержку
                     setTimeout(() => {
-                        const sections = firstBrand.querySelectorAll('.section-header');
+                        const sections = firstBrandItem.querySelectorAll('.section-item .section-header');
                         sections.forEach(section => {
                             section.click();
                         });
-                    }, 200);
+                        
+                        // Настраиваем обработчики для загруженных элементов
+                        if (typeof window.setupLoadedElementsHandlers === 'function') {
+                            const brandId = parseInt(firstBrandItem.dataset.id, 10);
+                            const brand = window.brands.find(b => b.id === brandId);
+                            if (brand) {
+                                window.setupLoadedElementsHandlers(firstBrandItem, brand);
+                            }
+                        }
+                    }, 300);
                 }
             }
         }, 300);
