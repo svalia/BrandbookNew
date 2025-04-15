@@ -554,6 +554,15 @@ function setupStyleToSetModal(modalElement, styleSetId) {
     
     // Получаем текущий бренд
     const activeBrand = getCurrentBrand();
+    let styleSetName = "Набор стилей";
+    
+    if (activeBrand && activeBrand.sections && activeBrand.sections.typography && activeBrand.sections.typography.styleSets) {
+        const styleSet = activeBrand.sections.typography.styleSets.find(set => set.id == styleSetId);
+        if (styleSet && styleSet.name) {
+            styleSetName = styleSet.name;
+        }
+    }
+    
     if (activeBrand && activeBrand.sections && activeBrand.sections.typography && activeBrand.sections.typography.fonts) {
         // Заполняем список шрифтов из текущего бренда
         const fonts = activeBrand.sections.typography.fonts;
@@ -574,8 +583,8 @@ function setupStyleToSetModal(modalElement, styleSetId) {
         const lineHeight = lineHeightInput.value || '0';
         const fontId = fontSelect.value;
         
-        // Обновляем текст превью
-        previewTextElement.textContent = `${fontSize}/${lineHeight} · Стиль`;
+        // Обновляем текст превью с новым форматом, включая название набора стилей
+        previewTextElement.textContent = `${fontSize}/${lineHeight} · ${styleSetName}`;
         
         // Сбрасываем стили перед установкой новых
         previewTextElement.style.fontFamily = '';
@@ -586,6 +595,9 @@ function setupStyleToSetModal(modalElement, styleSetId) {
         if (fontId && activeBrand && activeBrand.sections && activeBrand.sections.typography && activeBrand.sections.typography.fonts) {
             const font = activeBrand.sections.typography.fonts.find(f => f.id == fontId);
             if (font) {
+                // Добавляем название шрифта и тип в текст превью
+                previewTextElement.textContent += ` · ${font.family} · ${font.type}${font.isItalic ? ' Italic' : ''}`;
+                
                 previewTextElement.style.fontFamily = `'${font.family}', sans-serif`;
                 previewTextElement.style.fontWeight = getFontWeight(font.type);
                 previewTextElement.style.fontStyle = font.isItalic ? 'italic' : 'normal';
@@ -894,16 +906,38 @@ function createStyleItem(style, setId) {
     const styleItem = document.createElement('div');
     styleItem.className = 'style-item';
     
-    // Получаем информацию о шрифте
-    const font = getFontById(style.fontId);
-    const fontName = font ? `${font.family} ${font.type}${font.isItalic ? ' Italic' : ''}` : 'Неизвестный шрифт';
+    // Находим информацию о шрифте и набору стиля
+    const activeBrand = getCurrentBrand();
+    let styleSetName = "Набор стилей";
+    let font = null;
     
-    // Добавляем текст стиля
+    if (activeBrand && activeBrand.sections && activeBrand.sections.typography) {
+        // Находим набор стилей по ID
+        if (activeBrand.sections.typography.styleSets) {
+            const styleSet = activeBrand.sections.typography.styleSets.find(set => set.id == setId);
+            if (styleSet && styleSet.name) {
+                styleSetName = styleSet.name;
+            }
+        }
+        
+        // Находим шрифт по ID
+        if (activeBrand.sections.typography.fonts) {
+            font = activeBrand.sections.typography.fonts.find(f => f.id == style.fontId);
+        }
+    }
+    
+    // Создаем текст стиля в новом формате
     const styleText = document.createElement('div');
     styleText.className = 'style-item-text';
-    styleText.textContent = `${style.fontSize}/${style.lineHeight} · ${fontName}`;
     
-    // Если шрифт найден, применяем его стили
+    // Формируем текст в формате "{Размер}/{Интервал} · {Название набора} · {Семейство шрифта} · {Тип шрифта}"
+    let displayText = `${style.fontSize}/${style.lineHeight} · ${styleSetName}`;
+    if (font) {
+        displayText += ` · ${font.family} · ${font.type}${font.isItalic ? ' Italic' : ''}`;
+    }
+    styleText.textContent = displayText;
+    
+    // Если шрифт найден, применяем его стилевые свойства
     if (font) {
         styleText.style.fontFamily = `'${font.family}', sans-serif`;
         styleText.style.fontSize = `${style.fontSize}px`;
@@ -1121,7 +1155,7 @@ function updateTypographyUI(brandId) {
                                 ${font ? `font-weight: ${getFontWeight(font.type)};` : ''}
                                 ${font && font.isItalic ? 'font-style: italic;' : ''}
                             ">
-                                ${style.fontSize}/${style.lineHeight} · ${fontName}
+                                ${style.fontSize}/${style.lineHeight} · ${styleSet.name} · ${font ? font.family : 'Unknown'} · ${font ? font.type + (font.isItalic ? ' Italic' : '') : 'Unknown'}
                             </div>
                             <button class="delete-style-item-btn" data-style-id="${style.id}" data-set-id="${styleSet.id}">
                                 <img src="img_src/x-icon.svg" alt="Удалить">
