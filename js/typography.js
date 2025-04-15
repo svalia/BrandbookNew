@@ -309,10 +309,7 @@ function createTypographySectionForBrand(brandId) {
                     <button class="add-description-btn btn btn-primary">Добавить описание</button>
                 </div>
                 <div class="typography-content mt-3">
-                    <div class="typography-actions">
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStyleSetModal">Добавить набор стилей</button>
-                    </div>
+                    
                     <div class="fonts-block">
                         <h3>Шрифты</h3>
                         <div class="fonts-list">
@@ -375,7 +372,7 @@ function createTypographySectionForBrand(brandId) {
     return typographySection;
 }
 
-// Добавляем функцию refreshTypographySection
+// Обновляем функцию refreshTypographySection
 function refreshTypographySection(brandId) {
     console.log("Refreshing typography section for brand ID:", brandId);
     
@@ -386,29 +383,16 @@ function refreshTypographySection(brandId) {
         return;
     }
     
-    // Попробуем найти существующую секцию типографики
-    const brandItem = document.querySelector(`.brand-item[data-id="${brandId}"]`);
-    if (!brandItem) {
-        console.error("Brand item not found for ID:", brandId);
-        return;
-    }
+    // Поиск секции типографики в DOM
+    const typographySection = document.querySelector(`#brandsList .brand-item[data-id="${brandId}"] .section-content[data-section="typography"]`);
     
-    // Находим секцию типографики внутри бренда
-    let typographySection = brandItem.querySelector('.section-content[data-section="typography"]');
-    
-    // Если секции типографики нет, создаем ее
-    if (!typographySection) {
-        console.log("Creating new typography section for brand ID:", brandId);
-        const sectionItem = createTypographySectionForBrand(brandId);
-        if (!sectionItem) {
-            console.error("Failed to create typography section");
-            return;
-        }
-        typographySection = sectionItem.querySelector('.section-content[data-section="typography"]');
-    } else {
-        console.log("Rendering existing typography section for brand ID:", brandId);
-        // Если секция уже есть, просто перерисуем её
+    if (typographySection) {
+        // Если секция существует, перерисовываем её содержимое
         renderTypographySection(brandId);
+    } else {
+        console.warn("Typography section not found in DOM, will try to create it");
+        // Если секция не существует, нужно её создать
+        createTypographySectionForBrand(brandId);
     }
 }
 
@@ -749,48 +733,44 @@ function setupStyleToSetModal(modalElement, styleSetId) {
     previewTextElement.style = "";
 }
 
-// Обновляем функцию renderTypographySection, чтобы она отображала всю секцию типографики
+// Обновляем функцию renderTypographySection, чтобы избежать дублирования кнопок действий
 function renderTypographySection(brandId) {
-    console.log("Рендер секции типографики для бренда:", brandId);
+    console.log("Rendering typography section for brand ID:", brandId);
     
     const brand = getBrandById(brandId);
     if (!brand) {
-        console.error("Бренд не найден для рендера типографики:", brandId);
+        console.error("Brand not found for rendering typography:", brandId);
         return;
     }
     
     // Находим контейнер для секции типографики
-    const typographyContainer = document.querySelector(`#brandsList .brand-item[data-id="${brandId}"] .section-content[data-section="typography"]`);
-    if (!typographyContainer) {
-        console.error("Контейнер секции типографики не найден для бренда:", brandId);
+    const typographySection = document.querySelector(`#brandsList .brand-item[data-id="${brandId}"] .section-content[data-section="typography"]`);
+    if (!typographySection) {
+        console.error("Typography section content not found");
         return;
     }
     
-    // Очищаем контейнер
-    // typographyContainer.innerHTML = ''; 
-    // НЕ очищаем полностью контейнер, чтобы сохранить описание и другие элементы
+    // Проверяем существует ли уже typography-content
+    let typographyContent = typographySection.querySelector('.typography-content');
     
-    // Проверяем, существует ли уже дочерний элемент с классом typography-content
-    let typographyContent = typographyContainer.querySelector('.typography-content');
-    
-    // Если нет, создаем новый
+    // Если нет, создаем новый контейнер
     if (!typographyContent) {
         typographyContent = document.createElement('div');
         typographyContent.className = 'typography-content';
-        typographyContainer.appendChild(typographyContent);
+        typographySection.appendChild(typographyContent);
     } else {
-        // Если элемент уже существует, очищаем его содержимое
+        // Если контейнер уже существует, очищаем его содержимое ПОЛНОСТЬЮ
         typographyContent.innerHTML = '';
     }
     
     // Добавляем кнопки действий
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'typography-actions';
-    actionsDiv.innerHTML = `
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStyleSetModal">Добавить набор стилей</button>
-    `;
-    typographyContent.appendChild(actionsDiv);
+    // const actionsDiv = document.createElement('div');
+    // actionsDiv.className = 'typography-actions';
+    // actionsDiv.innerHTML = `
+    //     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
+    //     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStyleSetModal">Добавить набор стилей</button>
+   //  `;
+    // typographyContent.appendChild(actionsDiv);
     
     // Отрисовываем блок шрифтов
     const fontsBlock = document.createElement('div');
@@ -801,7 +781,8 @@ function renderTypographySection(brandId) {
     fontsList.className = 'fonts-list';
     
     // Проверяем наличие шрифтов
-    if (brand.sections.typography && brand.sections.typography.fonts && brand.sections.typography.fonts.length > 0) {
+    if (brand.sections?.typography?.fonts && brand.sections.typography.fonts.length > 0) {
+        // Отрисовка шрифтов
         brand.sections.typography.fonts.forEach(font => {
             const fontItem = document.createElement('div');
             fontItem.className = 'font-item';
@@ -847,7 +828,7 @@ function renderTypographySection(brandId) {
     stylesBlock.innerHTML = `<h3>Наборы стилей</h3>`;
     
     // Проверяем наличие наборов стилей
-    if (brand.sections.typography && brand.sections.typography.styleSets && brand.sections.typography.styleSets.length > 0) {
+    if (brand.sections?.typography?.styleSets && brand.sections.typography.styleSets.length > 0) {
         brand.sections.typography.styleSets.forEach(styleSet => {
             const styleSetCard = document.createElement('div');
             styleSetCard.className = 'style-set-card';
@@ -899,6 +880,18 @@ function renderTypographySection(brandId) {
     }
     
     typographyContent.appendChild(stylesBlock);
+    
+    // Обновляем иконку
+    const sectionHeader = typographySection.closest('.section-item').querySelector('.section-header');
+    if (sectionHeader) {
+        const icon = sectionHeader.querySelector('.section-toggle-icon');
+        if (icon) {
+            icon.src = "img_src/chevron-up-gray.svg";
+        }
+    }
+    
+    // Настраиваем обработчики событий для кнопок удаления
+    setupDeleteButtons(typographySection, brandId);
 }
 
 // Вспомогательная функция для создания элемента стиля
@@ -1080,7 +1073,7 @@ function updateTypographyUI(brandId) {
     
     // Формируем HTML для кнопок добавления в типографику
     let html = `
-        <div class="typography-actions">
+        <div class="typography-actions" style="display: none;">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStyleSetModal">Добавить набор стилей</button>
         </div>

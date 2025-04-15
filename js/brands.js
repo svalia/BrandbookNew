@@ -480,7 +480,7 @@ function renderTypographySection(brand) {
     }
 
     let typographyHTML = `
-        <div class="typography-actions mt-3">
+        <div class="typography-actions1 mt-3">
             <button class="add-description-btn btn btn-primary" id="addFont" data-bs-toggle="modal" data-bs-target="#addFontModal">Добавить шрифт</button>
             <button class="add-description-btn btn btn-primary" id="addStyleSet" data-bs-toggle="modal" data-bs-target="#addStyleSetModal">Добавить набор стилей</button>
         </div>
